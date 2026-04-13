@@ -15,6 +15,11 @@ const CATEGORY_CONFIG = {
   trends:  { label: 'トレンド', emoji: '🔥', color: 'bg-violet-500', light: 'bg-violet-50 text-violet-600', gradient: 'from-violet-400 to-purple-600'},
 };
 
+function isNew(dateStr?: string) {
+  if (!dateStr) return false;
+  try { return Date.now() - new Date(dateStr).getTime() < 6 * 3600000; } catch { return false; }
+}
+
 function formatDate(dateStr?: string) {
   if (!dateStr) return null;
   try {
@@ -45,6 +50,7 @@ function BigCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
   const date = formatDate(item.publishedAt);
   const [imgError, setImgError] = useState(false);
   const showImg = item.thumbnail && !imgError;
+  const showNew = !isRead && isNew(item.publishedAt);
 
   return (
     <article className={`group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-slate-700 hover:shadow-xl hover:shadow-gray-200/60 dark:hover:shadow-slate-900/40 transition-all duration-300 ${isRead ? 'opacity-70' : ''}`}>
@@ -71,12 +77,16 @@ function BigCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
         <span className={`absolute top-3 left-3 ${cfg.color} text-white text-xs font-bold px-2.5 py-1 rounded-full shadow`}>
           {cfg.label}
         </span>
-        {/* HOTバッジ */}
-        {(item.hotScore ?? 0) >= HOT_THRESHOLD && (
+        {/* HOT/NEWバッジ */}
+        {(item.hotScore ?? 0) >= HOT_THRESHOLD ? (
           <span className="absolute top-3 right-3 bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow flex items-center gap-1">
             🔥 HOT
           </span>
-        )}
+        ) : showNew ? (
+          <span className="absolute top-3 right-3 bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
+            NEW
+          </span>
+        ) : null}
         {/* グラデーションオーバーレイ */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
       </a>
@@ -130,6 +140,7 @@ function BigCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
 function SmallCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
   const cfg = CATEGORY_CONFIG[item.category];
   const date = formatDate(item.publishedAt);
+  const showNew = !isRead && isNew(item.publishedAt);
 
   return (
     <article className={`group bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-3.5 flex gap-3 hover:border-gray-200 dark:hover:border-slate-600 hover:shadow-md hover:shadow-gray-100 dark:hover:shadow-slate-900/30 transition-all duration-200 ${isRead ? 'opacity-60' : ''}`}>

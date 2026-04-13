@@ -32,19 +32,21 @@ async function fetchOgImage(url: string): Promise<string | null> {
   }
 }
 
-// 並列でOG画像を取得して各 item に追加（最大10件同時）
+// 並列でOG画像を取得して各 item に追加（最大10件同時、既存サムネイルはスキップ）
 export async function enrichWithThumbnails(items: TrendItem[]): Promise<TrendItem[]> {
   const BATCH = 10;
   const result = [...items];
+  // サムネイルなし・URLありの記事だけ対象
+  const needsImg = result.map((item, idx) => (!item.thumbnail && item.url ? idx : -1)).filter(i => i >= 0);
 
-  for (let i = 0; i < result.length; i += BATCH) {
-    const batch = result.slice(i, i + BATCH);
+  for (let b = 0; b < needsImg.length; b += BATCH) {
+    const batch = needsImg.slice(b, b + BATCH);
     const images = await Promise.allSettled(
-      batch.map(item => item.url ? fetchOgImage(item.url) : Promise.resolve(null))
+      batch.map(idx => fetchOgImage(result[idx].url!))
     );
     images.forEach((res, j) => {
       if (res.status === 'fulfilled' && res.value) {
-        result[i + j] = { ...result[i + j], thumbnail: res.value };
+        result[batch[j]] = { ...result[batch[j]], thumbnail: res.value };
       }
     });
   }

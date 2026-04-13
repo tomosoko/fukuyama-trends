@@ -32,9 +32,9 @@ export async function GET() {
       return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
     });
 
-    // OG画像を並列取得（上位20件）
-    const top = await enrichWithThumbnails(all.slice(0, 20));
-    all = [...top, ...all.slice(20)];
+    // OG画像を並列取得（上位30件、既存サムネイルはスキップ）
+    const top = await enrichWithThumbnails(all.slice(0, 30));
+    all = [...top, ...all.slice(30)];
 
     // ホットスコア付与
     all = enrichWithScore(all);

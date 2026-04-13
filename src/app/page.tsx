@@ -10,9 +10,12 @@ import { TopPicks } from '@/components/TopPicks';
 import { BottomNav } from '@/components/BottomNav';
 import { DateFilter, DateRange, filterByDate } from '@/components/DateFilter';
 import { StatsBar } from '@/components/StatsBar';
+import { SortSelect, SortOrder } from '@/components/SortSelect';
 import { useDebounce } from '@/lib/useDebounce';
 import { useDarkMode } from '@/lib/useDarkMode';
 import { getFavorites } from '@/lib/favorites';
+
+const PAGE_SIZE = 12;
 
 // ---- AI要約カード ----
 function SummaryCard({ summary, loading }: { summary: AISummary | null; loading: boolean }) {
@@ -52,19 +55,15 @@ function SummaryCard({ summary, loading }: { summary: AISummary | null; loading:
   );
 }
 
-// ---- ダークモードボタン ----
 function DarkModeButton({ theme, toggle }: { theme: string; toggle: () => void }) {
   const icons: Record<string, string> = { light: '☀️', dark: '🌙', system: '⚙️' };
   return (
-    <button onClick={toggle}
-      className="text-base hover:scale-110 transition-transform"
-      title={`テーマ: ${theme}`}>
+    <button onClick={toggle} className="text-base hover:scale-110 transition-transform" title={`テーマ: ${theme}`}>
       {icons[theme]}
     </button>
   );
 }
 
-// ---- 空状態 ----
 function EmptyState({ search, onClear }: { search: string; onClear: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -72,16 +71,11 @@ function EmptyState({ search, onClear }: { search: string; onClear: () => void }
       <p className="text-gray-500 dark:text-slate-400 font-medium mb-1">
         {search ? `「${search}」に一致する情報が見つかりませんでした` : '情報が見つかりませんでした'}
       </p>
-      {search && (
-        <button onClick={onClear} className="mt-3 text-sm text-blue-500 hover:underline">
-          検索をクリア
-        </button>
-      )}
+      {search && <button onClick={onClear} className="mt-3 text-sm text-blue-500 hover:underline">検索をクリア</button>}
     </div>
   );
 }
 
-// ---- エラー状態 ----
 function ErrorState({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -96,6 +90,15 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
   );
 }
 
+function sortItems(items: TrendItem[], order: SortOrder): TrendItem[] {
+  return [...items].sort((a, b) => {
+    if (order === 'source') return a.source.localeCompare(b.source);
+    const ta = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+    const tb = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+    return order === 'newest' ? tb - ta : ta - tb;
+  });
+}
+
 // ---- メインページ ----
 export default function Home() {
   const { theme, toggle: toggleDark } = useDarkMode();
@@ -106,6 +109,8 @@ export default function Home() {
   const [searchRaw, setSearchRaw] = useState('');
   const search = useDebounce(searchRaw, 300);
   const [dateRange, setDateRange] = useState<DateRange>('all');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
+  const [page, setPage] = useState(1);
   const [loadingItems, setLoadingItems] = useState(true);
   const [loadingSummary, setLoadingSummary] = useState(true);
   const [error, setError] = useState(false);
@@ -114,7 +119,6 @@ export default function Home() {
   const [showFavs, setShowFavs] = useState(false);
   const [favIds, setFavIds] = useState<Set<string>>(new Set());
 
-  // お気に入りIDを同期
   useEffect(() => {
     setFavIds(getFavorites());
     const handler = () => setFavIds(getFavorites());
@@ -124,6 +128,7 @@ export default function Home() {
 
   const load = useCallback((force = false) => {
     setError(false);
+    setPage(1);
     if (force) setRefreshing(true);
     setLoadingItems(true);
     setLoadingSummary(true);
@@ -143,6 +148,9 @@ export default function Home() {
 
   useEffect(() => { load(); }, [load]);
 
+  // カテゴリ/検索変更時はページをリセット
+  useEffect(() => { setPage(1); }, [category, search, dateRange, sortOrder, showFavs]);
+
   const counts = useMemo(() => {
     const base = { all: items.length, gourmet: 0, events: 0, trends: 0 } as Record<Category, number>;
     for (const item of items) base[item.category]++;
@@ -151,13 +159,17 @@ export default function Home() {
 
   const filtered = useMemo(() => {
     let src = showFavs ? items.filter(i => favIds.has(i.id)) : items;
-    return src.filter(item => {
+    src = src.filter(item => {
       if (category !== 'all' && item.category !== category) return false;
       if (!filterByDate(item.publishedAt, dateRange)) return false;
       if (search && !item.title.includes(search) && !item.summary.includes(search)) return false;
       return true;
     });
-  }, [items, category, search, dateRange, showFavs, favIds]);
+    return sortItems(src, sortOrder);
+  }, [items, category, search, dateRange, sortOrder, showFavs, favIds]);
+
+  const visible = filtered.slice(0, page * PAGE_SIZE);
+  const hasMore = visible.length < filtered.length;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors">
@@ -177,12 +189,10 @@ export default function Home() {
               </p>
             </div>
           </div>
-
           <div className="flex items-center gap-1 shrink-0">
-            {/* お気に入りトグル */}
             <button
               onClick={() => setShowFavs(v => !v)}
-              className={`p-2 rounded-lg text-sm transition-colors ${showFavs ? 'text-rose-500 bg-rose-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}
+              className={`p-2 rounded-lg transition-colors ${showFavs ? 'text-rose-500 bg-rose-50 dark:bg-rose-900/20' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
               title="お気に入り"
             >
               <svg className="w-4 h-4" fill={showFavs ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
@@ -190,9 +200,7 @@ export default function Home() {
                   d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </button>
-            {/* ダークモード */}
             <DarkModeButton theme={theme} toggle={toggleDark} />
-            {/* 更新 */}
             <button
               onClick={() => load(true)}
               disabled={refreshing || loadingItems}
@@ -209,25 +217,22 @@ export default function Home() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-5 pb-24 sm:pb-8 space-y-4">
-        {/* AI要約 */}
         <SummaryCard summary={summary} loading={loadingSummary} />
-
-        {/* トップピックス */}
         {!loadingItems && !showFavs && <TopPicks items={items.slice(0, 5)} />}
-
-        {/* 統計バー */}
         {!loadingItems && <StatsBar items={items} updatedAt={updatedAt} />}
 
-        {/* フィルター（PCのみカテゴリタブ、モバイルはボトムナビ） */}
         <div className="hidden sm:block">
           <CategoryTabs active={category} onChange={setCategory} counts={counts} />
         </div>
 
-        {/* 検索・日付フィルター */}
         <SearchBar value={searchRaw} onChange={setSearchRaw} />
-        <DateFilter active={dateRange} onChange={setDateRange} />
 
-        {/* お気に入り中バナー */}
+        {/* フィルター行 */}
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <DateFilter active={dateRange} onChange={setDateRange} />
+          <SortSelect value={sortOrder} onChange={setSortOrder} />
+        </div>
+
         {showFavs && (
           <div className="flex items-center gap-2 px-3 py-2 bg-rose-50 dark:bg-rose-900/20 rounded-xl text-xs text-rose-500 font-medium">
             <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
@@ -238,7 +243,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* 件数 */}
         {!loadingItems && !error && (
           <p className="text-xs text-gray-400 dark:text-slate-500 px-0.5">
             {filtered.length} 件
@@ -246,7 +250,6 @@ export default function Home() {
           </p>
         )}
 
-        {/* コンテンツ */}
         {error ? (
           <ErrorState onRetry={() => load(true)} />
         ) : loadingItems ? (
@@ -254,11 +257,23 @@ export default function Home() {
         ) : filtered.length === 0 ? (
           <EmptyState search={searchRaw} onClear={() => setSearchRaw('')} />
         ) : (
-          <div className="grid gap-3">
-            {filtered.map(item => (
-              <TrendCard key={item.id} item={item} search={search} />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-3">
+              {visible.map(item => (
+                <TrendCard key={item.id} item={item} search={search} />
+              ))}
+            </div>
+
+            {/* もっと見る */}
+            {hasMore && (
+              <button
+                onClick={() => setPage(p => p + 1)}
+                className="w-full py-3 rounded-xl border border-gray-200 dark:border-slate-700 text-sm font-medium text-gray-500 dark:text-slate-400 hover:border-blue-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              >
+                もっと見る ({filtered.length - visible.length} 件)
+              </button>
+            )}
+          </>
         )}
 
         <p className="text-center text-xs text-gray-300 dark:text-slate-700 pb-2">
@@ -266,7 +281,6 @@ export default function Home() {
         </p>
       </main>
 
-      {/* モバイル用ボトムナビ */}
       <BottomNav active={category} onChange={setCategory} counts={counts} />
     </div>
   );

@@ -2,35 +2,53 @@
 
 import { Category } from '@/lib/types';
 
-const TABS: { value: Category; label: string }[] = [
-  { value: 'all', label: '全部' },
-  { value: 'gourmet', label: 'グルメ' },
-  { value: 'events', label: 'イベント' },
-  { value: 'trends', label: 'トレンド' },
+const TABS: { value: Category; label: string; emoji: string }[] = [
+  { value: 'all', label: '全部', emoji: '✦' },
+  { value: 'gourmet', label: 'グルメ', emoji: '🍜' },
+  { value: 'events', label: 'イベント', emoji: '🎪' },
+  { value: 'trends', label: 'トレンド', emoji: '🔥' },
 ];
 
 export function CategoryTabs({
   active,
   onChange,
+  counts,
 }: {
   active: Category;
   onChange: (c: Category) => void;
+  counts: Record<Category, number>;
 }) {
   return (
     <div className="flex gap-2 flex-wrap">
-      {TABS.map(tab => (
-        <button
-          key={tab.value}
-          onClick={() => onChange(tab.value)}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-            active === tab.value
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-400'
-          }`}
-        >
-          {tab.label}
-        </button>
-      ))}
+      {TABS.map(tab => {
+        const count = counts[tab.value];
+        const isActive = active === tab.value;
+        return (
+          <button
+            key={tab.value}
+            onClick={() => onChange(tab.value)}
+            className={`
+              flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium
+              transition-all duration-200 select-none
+              ${isActive
+                ? 'bg-gray-900 text-white shadow-md shadow-gray-900/20'
+                : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-400 hover:text-gray-900'
+              }
+            `}
+          >
+            <span>{tab.emoji}</span>
+            <span>{tab.label}</span>
+            {count > 0 && (
+              <span className={`
+                text-xs px-1.5 py-0.5 rounded-full font-semibold min-w-[20px] text-center
+                ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}
+              `}>
+                {count}
+              </span>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -237,7 +237,10 @@ export default function Home() {
     src = src.filter(item => {
       if (category !== 'all' && item.category !== category) return false;
       if (!filterByDate(item.publishedAt, dateRange)) return false;
-      if (search && !item.title.includes(search) && !item.summary.includes(search)) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        if (!item.title.toLowerCase().includes(q) && !item.summary.toLowerCase().includes(q)) return false;
+      }
       return true;
     });
     return sortItems(src, sortOrder);
@@ -248,6 +251,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors">
+      {/* ローディングバー */}
+      {(loadingItems || refreshing) && (
+        <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-blue-100 dark:bg-slate-800 overflow-hidden">
+          <div className="h-full bg-blue-500 animate-[loadbar_1.5s_ease-in-out_infinite]" />
+        </div>
+      )}
       {/* ヘッダー */}
       <header className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-100 dark:border-slate-800 sticky top-0 z-20 transition-all duration-300 ${scrolled ? 'shadow-sm' : ''}`}>
         <div className={`max-w-2xl mx-auto px-4 flex items-center gap-3 transition-all duration-300 ${scrolled ? 'h-11' : 'h-14'}`}>

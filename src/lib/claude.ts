@@ -8,28 +8,30 @@ export async function generateSummary(items: TrendItem[]): Promise<AISummary> {
     return { highlight: '情報を取得できませんでした。', items: [] };
   }
 
+  const now = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
   const itemsText = items
-    .slice(0, 20)
-    .map(i => `[${i.category}] ${i.title}: ${i.summary.slice(0, 100)}`)
+    .slice(0, 25)
+    .map((i, idx) => `${idx + 1}. [${i.category}] ${i.title}${i.summary ? `\n   → ${i.summary.slice(0, 120)}` : ''}`)
     .join('\n');
 
   const message = await client.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 800,
+    max_tokens: 1000,
     messages: [
       {
         role: 'user',
-        content: `以下は福山市の最新情報です。今注目すべきことを日本語で簡潔にまとめてください。
+        content: `あなたは福山市（広島県）の地域情報キュレーターです。${now}時点の最新情報を分析し、市民が今日注目すべき情報を的確にまとめてください。
 
+【最新情報一覧】
 ${itemsText}
 
-以下のJSON形式で返してください（マークダウンなし、JSONのみ）:
+以下のJSON形式のみで返答してください（前後にマークダウンや説明文を一切含めないこと）:
 {
-  "highlight": "今週の福山を一言で表す文章（50文字以内）",
+  "highlight": "今の福山市を端的に表すキャッチコピー（40文字以内、具体的な話題に言及）",
   "items": [
-    { "category": "グルメ", "text": "注目ポイント（60文字以内）" },
-    { "category": "イベント", "text": "注目ポイント（60文字以内）" },
-    { "category": "トレンド", "text": "注目ポイント（60文字以内）" }
+    { "category": "グルメ", "text": "具体的な店名・料理名・エリアを含む注目ポイント（70文字以内）" },
+    { "category": "イベント", "text": "日程・場所を含む具体的な注目イベント（70文字以内）" },
+    { "category": "トレンド", "text": "SNSや話題のスポット・ニュース（70文字以内）" }
   ]
 }`,
       },

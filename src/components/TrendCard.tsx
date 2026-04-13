@@ -152,6 +152,9 @@ function SmallCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
           {(item.hotScore ?? 0) >= HOT_THRESHOLD && (
             <span className="text-xs font-bold text-rose-500">🔥</span>
           )}
+          {showNew && (
+            <span className="text-xs font-bold text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded-full">NEW</span>
+          )}
           <span className="text-xs text-gray-400 dark:text-slate-500 truncate">{item.source}</span>
           {date && <span className="text-xs text-gray-300 dark:text-slate-600 ml-auto shrink-0">{date}</span>}
         </div>

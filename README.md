@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 福山トレンド
 
-## Getting Started
+福山市（広島県）の最新トレンド・おすすめ情報を自動収集してお届けするWebアプリ。
 
-First, run the development server:
+## 機能
+
+- **RSS + Google News 自動収集** — 福山市限定キーワードで絞り込み
+- **OG画像取得** — 各記事のサムネイルを自動取得してマガジン風表示
+- **Claude AI まとめ** — 全体・カテゴリ別のAI要約（タブ切替）
+- **HOTスコア** — 新着度・画像有無でスコアリングし 🔥 バッジ表示
+- **お気に入り / 既読管理** — localStorage で永続化
+- **ダークモード** — light/dark/system 3段切替
+- **タイムライン表示** — 日付グループ化モード
+- **キーボードショートカット** — `/` 検索、`r` 更新、`d` ダーク、`?` ヘルプ
+- **自動更新** — 5分ごと + タブアクティブ時に自動リロード
+- **PWA対応** — manifest.json、スマホホーム画面追加可能
+- **モバイルボトムナビ** — スマホ専用ナビゲーション
+
+## セットアップ
 
 ```bash
+npm install
+echo 'ANTHROPIC_API_KEY=sk-ant-xxxx' > .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 環境変数
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| 変数名 | 説明 |
+|--------|------|
+| `ANTHROPIC_API_KEY` | Anthropic APIキー（AI要約に必要、なしでもRSS取得は動作） |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 技術スタック
 
-## Learn More
+- **Next.js 16** (App Router) + **TypeScript** + **Tailwind CSS**
+- **Claude API** `claude-sonnet-4-6` — AI要約生成
+- **rss-parser** — RSSフィード取得
+- サーバーサイドキャッシュ（RSS: 10分 / AI要約: 30分）
 
-To learn more about Next.js, take a look at the following resources:
+## キーボードショートカット
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| キー | 動作 |
+|------|------|
+| `/` | 検索フォームにフォーカス |
+| `Esc` | 検索クリア |
+| `r` | データ更新 |
+| `d` | ダークモード切替 |
+| `?` | ショートカット一覧 |

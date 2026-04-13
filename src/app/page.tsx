@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { TrendItem, Category, AISummary } from '@/lib/types';
 import { TrendCard } from '@/components/TrendCard';
 import { CategoryTabs } from '@/components/CategoryTabs';
@@ -15,6 +15,8 @@ import { TimelineView } from '@/components/TimelineView';
 import { useDebounce } from '@/lib/useDebounce';
 import { useDarkMode } from '@/lib/useDarkMode';
 import { useScrolled } from '@/lib/useScrolled';
+import { useAutoRefresh } from '@/lib/useAutoRefresh';
+import { useKeyboard } from '@/lib/useKeyboard';
 import { getFavorites } from '@/lib/favorites';
 
 const PAGE_SIZE = 12;
@@ -105,6 +107,7 @@ function sortItems(items: TrendItem[], order: SortOrder): TrendItem[] {
 export default function Home() {
   const { theme, toggle: toggleDark } = useDarkMode();
   const scrolled = useScrolled(40);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const [items, setItems] = useState<TrendItem[]>([]);
   const [summary, setSummary] = useState<AISummary | null>(null);
@@ -151,6 +154,16 @@ export default function Home() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  // 5分ごとに自動更新（キャッシュ再利用なのでAPI負荷は低い）
+  useAutoRefresh(() => load(false), 5 * 60 * 1000);
+
+  // キーボードショートカット
+  useKeyboard({
+    searchRef: searchInputRef,
+    onRefresh: () => load(true),
+    onToggleDark: toggleDark,
+  });
 
   // カテゴリ/検索変更時はページをリセット
   useEffect(() => { setPage(1); }, [category, search, dateRange, sortOrder, showFavs]);
@@ -229,7 +242,7 @@ export default function Home() {
           <CategoryTabs active={category} onChange={setCategory} counts={counts} />
         </div>
 
-        <SearchBar value={searchRaw} onChange={setSearchRaw} />
+        <SearchBar ref={searchInputRef} value={searchRaw} onChange={setSearchRaw} />
 
         {/* フィルター行 */}
         <div className="flex items-center justify-between gap-2 flex-wrap">

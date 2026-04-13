@@ -19,7 +19,7 @@ export function BottomNav({
   counts: Record<Category, number>;
 }) {
   return (
-    <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-md border-t border-gray-100 safe-area-inset-bottom">
+    <nav aria-label="カテゴリナビゲーション" className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-md border-t border-gray-100 safe-area-inset-bottom">
       <div className="flex">
         {NAV_ITEMS.map(item => {
           const isActive = active === item.value;

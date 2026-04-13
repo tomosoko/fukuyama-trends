@@ -19,7 +19,7 @@ export function CategoryTabs({
   counts: Record<Category, number>;
 }) {
   return (
-    <div className="flex gap-2 flex-wrap">
+    <div className="flex gap-2 flex-wrap" role="tablist" aria-label="カテゴリ選択">
       {TABS.map(tab => {
         const count = counts[tab.value];
         const isActive = active === tab.value;
@@ -27,12 +27,14 @@ export function CategoryTabs({
           <button
             key={tab.value}
             onClick={() => onChange(tab.value)}
-            className={`
+            role="tab"
+          aria-selected={isActive}
+          className={`
               flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium
               transition-all duration-200 select-none
               ${isActive
                 ? 'bg-gray-900 text-white shadow-md shadow-gray-900/20'
-                : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-400 hover:text-gray-900'
+                : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-400 border border-gray-200 dark:border-slate-700 hover:border-gray-400 hover:text-gray-900'
               }
             `}
           >

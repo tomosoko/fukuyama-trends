@@ -29,6 +29,9 @@ export function calcHotScore(item: TrendItem): number {
   return score;
 }
 
+/** HOTバッジを表示する閾値 */
+export const HOT_THRESHOLD = 50;
+
 export function enrichWithScore(items: TrendItem[]): (TrendItem & { hotScore: number })[] {
   return items.map(item => ({ ...item, hotScore: calcHotScore(item) }));
 }

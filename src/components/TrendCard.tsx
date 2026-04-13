@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { TrendItem } from '@/lib/types';
 import { getFavorites, toggleFavorite } from '@/lib/favorites';
 import { getReadIds, markAsRead } from '@/lib/read-history';
+import { HOT_THRESHOLD } from '@/lib/hot-score';
 import { highlight } from './SearchBar';
 
 const CATEGORY_CONFIG = {
@@ -56,7 +57,7 @@ function BigCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
           {cfg.label}
         </span>
         {/* HOTバッジ */}
-        {(item.hotScore ?? 0) >= 60 && (
+        {(item.hotScore ?? 0) >= HOT_THRESHOLD && (
           <span className="absolute top-3 right-3 bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow flex items-center gap-1">
             🔥 HOT
           </span>
@@ -122,7 +123,7 @@ function SmallCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.light}`}>{cfg.label}</span>
-          {(item.hotScore ?? 0) >= 60 && (
+          {(item.hotScore ?? 0) >= HOT_THRESHOLD && (
             <span className="text-xs font-bold text-rose-500">🔥</span>
           )}
           <span className="text-xs text-gray-400 dark:text-slate-500 truncate">{item.source}</span>

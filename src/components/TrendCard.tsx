@@ -159,7 +159,10 @@ function SmallCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
           {date && <span className="text-xs text-gray-300 dark:text-slate-600 ml-auto shrink-0">{date}</span>}
         </div>
         <h3 className="font-semibold text-gray-900 dark:text-slate-100 text-sm leading-snug mb-1 line-clamp-2">
-          {highlight(item.title, search)}
+          {item.url
+            ? <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={onRead} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{highlight(item.title, search)}</a>
+            : highlight(item.title, search)
+          }
         </h3>
         {item.summary && (
           <p className="text-xs text-gray-500 dark:text-slate-400 line-clamp-1 leading-relaxed">

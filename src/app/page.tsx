@@ -18,6 +18,7 @@ import { FukuyamaInfo } from '@/components/FukuyamaInfo';
 import { KeyboardHelp } from '@/components/KeyboardHelp';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import { FeaturedCard } from '@/components/FeaturedCard';
+import { InstallPrompt } from '@/components/InstallPrompt';
 import { useDebounce } from '@/lib/useDebounce';
 import { useDarkMode } from '@/lib/useDarkMode';
 import { useScrolled } from '@/lib/useScrolled';
@@ -405,6 +406,7 @@ export default function Home() {
       <ToastContainer />
       <KeyboardHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
       <ScrollToTop />
+      <InstallPrompt />
     </div>
   );
 }

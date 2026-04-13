@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState, useMemo, useRef } from 'react';
+import Link from 'next/link';
 import { TrendItem, Category, AISummary } from '@/lib/types';
 import { TrendCard } from '@/components/TrendCard';
 import { CategoryTabs } from '@/components/CategoryTabs';
@@ -265,14 +266,24 @@ export default function Home() {
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={() => setShowFavs(v => !v)}
-              className={`p-2 rounded-lg transition-colors ${showFavs ? 'text-rose-500 bg-rose-50 dark:bg-rose-900/20' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
-              title="お気に入り"
+              className={`relative p-2 rounded-lg transition-colors ${showFavs ? 'text-rose-500 bg-rose-50 dark:bg-rose-900/20' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+              title="お気に入りフィルター"
             >
               <svg className="w-4 h-4" fill={showFavs ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
+              {favIds.size > 0 && !showFavs && (
+                <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                  {favIds.size > 9 ? '9+' : favIds.size}
+                </span>
+              )}
             </button>
+            <Link href="/favorites" className="p-2 rounded-lg text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors" title="お気に入りページ">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+            </Link>
             <DarkModeButton theme={theme} toggle={toggleDark} />
             <button
               onClick={() => load(true)}

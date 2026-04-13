@@ -272,9 +272,7 @@ export default function Home() {
             <div className="min-w-0">
               <h1 className="text-sm font-bold text-gray-900 dark:text-slate-100 leading-none">福山トレンド</h1>
               <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5 truncate">
-                {updatedAt
-                  ? `${updatedAt.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} 更新`
-                  : '最新情報をお届け'}
+                {updatedAt ? `${items.length}件 · ${updatedAt.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}更新` : '最新情報をお届け'}
               </p>
             </div>
           </div>

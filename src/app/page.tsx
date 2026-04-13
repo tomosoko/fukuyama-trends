@@ -19,6 +19,7 @@ import { KeyboardHelp } from '@/components/KeyboardHelp';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import { FeaturedCard } from '@/components/FeaturedCard';
 import { InstallPrompt } from '@/components/InstallPrompt';
+import { TrendingKeywords } from '@/components/TrendingKeywords';
 import { useDebounce } from '@/lib/useDebounce';
 import { useDarkMode } from '@/lib/useDarkMode';
 import { useScrolled } from '@/lib/useScrolled';
@@ -331,6 +332,9 @@ export default function Home() {
           );
         })()}
         {!loadingItems && !showFavs && (category !== 'all' || search) && <TopPicks items={[...items].sort((a, b) => (b.hotScore ?? 0) - (a.hotScore ?? 0)).slice(0, 5)} />}
+        {!loadingItems && items.length > 0 && (
+          <TrendingKeywords items={items} onSearch={kw => { setSearchRaw(kw); searchInputRef.current?.focus(); }} />
+        )}
         {!loadingItems && <StatsBar items={items} updatedAt={updatedAt} />}
 
         <div className="hidden sm:block">

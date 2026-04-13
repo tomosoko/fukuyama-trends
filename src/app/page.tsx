@@ -13,7 +13,7 @@ import { DateFilter, DateRange, filterByDate } from '@/components/DateFilter';
 import { StatsBar } from '@/components/StatsBar';
 import { SortSelect, SortOrder } from '@/components/SortSelect';
 import { TimelineView } from '@/components/TimelineView';
-import { ToastContainer } from '@/components/Toast';
+import { ToastContainer, showToast } from '@/components/Toast';
 import { FukuyamaInfo } from '@/components/FukuyamaInfo';
 import { KeyboardHelp } from '@/components/KeyboardHelp';
 import { ScrollToTop } from '@/components/ScrollToTop';
@@ -200,8 +200,12 @@ export default function Home() {
 
     fetch('/api/trends' + qs)
       .then(r => r.json())
-      .then((data: TrendItem[]) => { setItems(data); setUpdatedAt(new Date()); })
-      .catch(() => setError(true))
+      .then((data: TrendItem[]) => {
+        setItems(data);
+        setUpdatedAt(new Date());
+        if (force) showToast(`${data.length}件の情報を取得しました`, 'success');
+      })
+      .catch(() => { setError(true); if (force) showToast('データ取得に失敗しました', 'error'); })
       .finally(() => setLoadingItems(false));
 
     fetch('/api/summary' + qs)

@@ -5,13 +5,30 @@ import { HOT_THRESHOLD } from '@/lib/hot-score';
 import { getReadIds } from '@/lib/read-history';
 import { useState, useEffect } from 'react';
 
+function formatUpdatedAt(updatedAt: Date): string {
+  const diffMs = Date.now() - updatedAt.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return 'たった今更新';
+  if (diffMin < 60) return `${diffMin}分前に更新`;
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return `${diffH}時間前に更新`;
+  return updatedAt.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) + ' 更新';
+}
+
 export function StatsBar({ items, updatedAt }: { items: TrendItem[]; updatedAt: Date | null }) {
   const [readCount, setReadCount] = useState(0);
+  const [, setTick] = useState(0);
 
   useEffect(() => {
     const ids = getReadIds();
     setReadCount(items.filter(i => ids.has(i.id)).length);
   }, [items]);
+
+  useEffect(() => {
+    if (!updatedAt) return;
+    const timer = setInterval(() => setTick(t => t + 1), 60000);
+    return () => clearInterval(timer);
+  }, [updatedAt]);
 
   if (items.length === 0) return null;
 
@@ -45,9 +62,7 @@ export function StatsBar({ items, updatedAt }: { items: TrendItem[]; updatedAt: 
       {updatedAt && (
         <>
           <span className="text-gray-200 dark:text-slate-700">|</span>
-          <span className="shrink-0 ml-auto">
-            {updatedAt.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} 更新
-          </span>
+          <span className="shrink-0 ml-auto">{formatUpdatedAt(updatedAt)}</span>
         </>
       )}
     </div>

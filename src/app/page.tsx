@@ -376,8 +376,10 @@ export default function Home() {
             ) : (
               <>
                 <div className="space-y-3">
-                  {visible.map(item => (
-                    <TrendCard key={item.id} item={item} search={search} />
+                  {visible.map((item, i) => (
+                    <div key={item.id} className={`stagger-item animate-fade-in-up`} style={{ animationDelay: `${Math.min(i, 11) * 50}ms` }}>
+                      <TrendCard item={item} search={search} />
+                    </div>
                   ))}
                 </div>
                 {/* もっと見る */}

@@ -80,9 +80,13 @@ body {
 /* ---- テキストハイライト ---- */
 mark {
   background: #fef08a;
-  color: inherit;
+  color: #92400e;
   border-radius: 2px;
   padding: 0 2px;
+}
+.dark mark {
+  background: #78350f;
+  color: #fde68a;
 }
 
 /* ---- 横スクロールコンテナ（トップピックス） ---- */

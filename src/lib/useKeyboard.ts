@@ -50,5 +50,5 @@ export function useKeyboard({ searchRef, onRefresh, onToggleDark, onHelp }: Opti
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [searchRef, onRefresh, onToggleDark]);
+  }, [searchRef, onRefresh, onToggleDark, onHelp]);
 }

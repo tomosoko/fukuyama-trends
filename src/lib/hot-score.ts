@@ -32,6 +32,29 @@ export function calcHotScore(item: TrendItem): number {
 /** HOTバッジを表示する閾値 */
 export const HOT_THRESHOLD = 50;
 
+/** キーワード共通性から「話題度ボーナス」を計算（同じ単語が複数の記事に出てくる = トレンド） */
+function buildTrendBonus(items: TrendItem[]): Map<string, number> {
+  const wordCount = new Map<string, number>();
+  for (const item of items) {
+    // タイトルから2文字以上の日本語・英単語を抽出
+    const words = item.title.match(/[\u4e00-\u9faf\u3040-\u30ff\w]{2,}/g) ?? [];
+    const unique = new Set(words);
+    unique.forEach(w => wordCount.set(w, (wordCount.get(w) ?? 0) + 1));
+  }
+  // 各記事のトレンドボーナス = 含む単語のうち3回以上出現するものの数 × 4
+  const bonus = new Map<string, number>();
+  for (const item of items) {
+    const words = item.title.match(/[\u4e00-\u9faf\u3040-\u30ff\w]{2,}/g) ?? [];
+    const hot = words.filter(w => (wordCount.get(w) ?? 0) >= 3).length;
+    bonus.set(item.id, Math.min(hot * 4, 16)); // 最大 +16
+  }
+  return bonus;
+}
+
 export function enrichWithScore(items: TrendItem[]): (TrendItem & { hotScore: number })[] {
-  return items.map(item => ({ ...item, hotScore: calcHotScore(item) }));
+  const trendBonus = buildTrendBonus(items);
+  return items.map(item => ({
+    ...item,
+    hotScore: calcHotScore(item) + (trendBonus.get(item.id) ?? 0),
+  }));
 }

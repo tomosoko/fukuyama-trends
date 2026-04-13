@@ -10,9 +10,9 @@ import { highlight } from './SearchBar';
 import { showToast } from './Toast';
 
 const CATEGORY_CONFIG = {
-  gourmet: { label: 'グルメ',   color: 'bg-orange-500', light: 'bg-orange-50 text-orange-600' },
-  events:  { label: 'イベント', color: 'bg-blue-500',   light: 'bg-blue-50 text-blue-600'   },
-  trends:  { label: 'トレンド', color: 'bg-violet-500', light: 'bg-violet-50 text-violet-600'},
+  gourmet: { label: 'グルメ',   emoji: '🍜', color: 'bg-orange-500', light: 'bg-orange-50 text-orange-600', gradient: 'from-orange-400 to-amber-500' },
+  events:  { label: 'イベント', emoji: '🎪', color: 'bg-blue-500',   light: 'bg-blue-50 text-blue-600',     gradient: 'from-blue-400 to-cyan-500'   },
+  trends:  { label: 'トレンド', emoji: '🔥', color: 'bg-violet-500', light: 'bg-violet-50 text-violet-600', gradient: 'from-violet-400 to-purple-600'},
 };
 
 function formatDate(dateStr?: string) {
@@ -43,19 +43,29 @@ async function shareItem(item: TrendItem) {
 function BigCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
   const cfg = CATEGORY_CONFIG[item.category];
   const date = formatDate(item.publishedAt);
+  const [imgError, setImgError] = useState(false);
+  const showImg = item.thumbnail && !imgError;
 
   return (
     <article className={`group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-slate-700 hover:shadow-xl hover:shadow-gray-200/60 dark:hover:shadow-slate-900/40 transition-all duration-300 ${isRead ? 'opacity-70' : ''}`}>
       {/* 画像エリア */}
-      <a href={item.url || '#'} target="_blank" rel="noopener noreferrer" onClick={onRead} className="block relative h-48 sm:h-56 overflow-hidden bg-gray-100 dark:bg-slate-700">
-        {item.thumbnail && (
+      <a href={item.url || '#'} target="_blank" rel="noopener noreferrer" onClick={onRead}
+        className={`block relative h-48 sm:h-56 overflow-hidden bg-gradient-to-br ${cfg.gradient} dark:bg-slate-700`}>
+        {showImg && (
           <Image
-            src={item.thumbnail}
+            src={item.thumbnail!}
             alt={item.title}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
             unoptimized
+            onError={() => setImgError(true)}
           />
+        )}
+        {/* 画像なし時のカテゴリアイコン */}
+        {!showImg && (
+          <div className="absolute inset-0 flex items-center justify-center text-5xl opacity-30">
+            {cfg.emoji}
+          </div>
         )}
         {/* カテゴリバッジ（画像の上） */}
         <span className={`absolute top-3 left-3 ${cfg.color} text-white text-xs font-bold px-2.5 py-1 rounded-full shadow`}>

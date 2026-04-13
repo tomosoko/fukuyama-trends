@@ -14,6 +14,8 @@ import { SortSelect, SortOrder } from '@/components/SortSelect';
 import { TimelineView } from '@/components/TimelineView';
 import { ToastContainer } from '@/components/Toast';
 import { FukuyamaInfo } from '@/components/FukuyamaInfo';
+import { KeyboardHelp } from '@/components/KeyboardHelp';
+import { ScrollToTop } from '@/components/ScrollToTop';
 import { useDebounce } from '@/lib/useDebounce';
 import { useDarkMode } from '@/lib/useDarkMode';
 import { useScrolled } from '@/lib/useScrolled';
@@ -176,6 +178,7 @@ export default function Home() {
   const [showFavs, setShowFavs] = useState(false);
   const [favIds, setFavIds] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
+  const [helpOpen, setHelpOpen] = useState(false);
 
   useEffect(() => {
     setFavIds(getFavorites());
@@ -214,6 +217,7 @@ export default function Home() {
     searchRef: searchInputRef,
     onRefresh: () => load(true),
     onToggleDark: toggleDark,
+    onHelp: () => setHelpOpen(true),
   });
 
   // カテゴリ/検索変更時はページをリセット
@@ -382,6 +386,8 @@ export default function Home() {
 
       <BottomNav active={category} onChange={setCategory} counts={counts} />
       <ToastContainer />
+      <KeyboardHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
+      <ScrollToTop />
     </div>
   );
 }

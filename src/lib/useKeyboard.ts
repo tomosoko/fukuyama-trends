@@ -6,9 +6,10 @@ interface Options {
   searchRef: RefObject<HTMLInputElement | null>;
   onRefresh: () => void;
   onToggleDark: () => void;
+  onHelp?: () => void;
 }
 
-export function useKeyboard({ searchRef, onRefresh, onToggleDark }: Options) {
+export function useKeyboard({ searchRef, onRefresh, onToggleDark, onHelp }: Options) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement).tagName;
@@ -36,6 +37,13 @@ export function useKeyboard({ searchRef, onRefresh, onToggleDark }: Options) {
       // d → ダークモード切替
       if (e.key === 'd' && !isEditing && !e.metaKey && !e.ctrlKey) {
         onToggleDark();
+        return;
+      }
+
+      // ? → ヘルプ
+      if (e.key === '?' && !isEditing) {
+        e.preventDefault();
+        onHelp?.();
         return;
       }
     };

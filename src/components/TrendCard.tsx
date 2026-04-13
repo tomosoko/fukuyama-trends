@@ -7,6 +7,7 @@ import { getFavorites, toggleFavorite } from '@/lib/favorites';
 import { getReadIds, markAsRead } from '@/lib/read-history';
 import { HOT_THRESHOLD } from '@/lib/hot-score';
 import { highlight } from './SearchBar';
+import { showToast } from './Toast';
 
 const CATEGORY_CONFIG = {
   gourmet: { label: 'グルメ',   color: 'bg-orange-500', light: 'bg-orange-50 text-orange-600' },
@@ -29,9 +30,13 @@ function formatDate(dateStr?: string) {
 
 async function shareItem(item: TrendItem) {
   try {
-    if (navigator.share) await navigator.share({ title: item.title, url: item.url || location.href });
-    else if (item.url) await navigator.clipboard.writeText(item.url);
-  } catch { /* ignore */ }
+    if (navigator.share) {
+      await navigator.share({ title: item.title, url: item.url || location.href });
+    } else if (item.url) {
+      await navigator.clipboard.writeText(item.url);
+      showToast('URLをコピーしました');
+    }
+  } catch { /* キャンセル等は無視 */ }
 }
 
 // 画像付きビッグカード

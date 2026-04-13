@@ -12,6 +12,8 @@ import { DateFilter, DateRange, filterByDate } from '@/components/DateFilter';
 import { StatsBar } from '@/components/StatsBar';
 import { SortSelect, SortOrder } from '@/components/SortSelect';
 import { TimelineView } from '@/components/TimelineView';
+import { ToastContainer } from '@/components/Toast';
+import { FukuyamaInfo } from '@/components/FukuyamaInfo';
 import { useDebounce } from '@/lib/useDebounce';
 import { useDarkMode } from '@/lib/useDarkMode';
 import { useScrolled } from '@/lib/useScrolled';
@@ -21,8 +23,41 @@ import { getFavorites } from '@/lib/favorites';
 
 const PAGE_SIZE = 12;
 
-// ---- AI要約カード ----
+type SummaryTab = 'all' | 'gourmet' | 'events' | 'trends';
+
+const SUMMARY_TABS: { value: SummaryTab; label: string; emoji: string }[] = [
+  { value: 'all',     label: '全体',     emoji: '✦' },
+  { value: 'gourmet', label: 'グルメ',   emoji: '🍜' },
+  { value: 'events',  label: 'イベント', emoji: '🎪' },
+  { value: 'trends',  label: 'トレンド', emoji: '🔥' },
+];
+
+// ---- AI要約カード（タブ切替対応） ----
 function SummaryCard({ summary, loading }: { summary: AISummary | null; loading: boolean }) {
+  const [tab, setTab] = useState<SummaryTab>('all');
+  const [catSummary, setCatSummary] = useState<AISummary | null>(null);
+  const [catLoading, setCatLoading] = useState(false);
+
+  const loadCatSummary = async (cat: SummaryTab) => {
+    if (cat === 'all') { setCatSummary(null); return; }
+    setCatLoading(true);
+    try {
+      const res = await fetch(`/api/summary/${cat}`);
+      const data = await res.json();
+      setCatSummary(data);
+    } catch { /* ignore */ } finally {
+      setCatLoading(false);
+    }
+  };
+
+  const handleTab = (t: SummaryTab) => {
+    setTab(t);
+    loadCatSummary(t);
+  };
+
+  const displaySummary = tab === 'all' ? summary : catSummary;
+  const displayLoading = tab === 'all' ? loading : catLoading;
+
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-5 text-white shadow-xl shadow-blue-900/20">
       <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/5" />
@@ -30,20 +65,36 @@ function SummaryCard({ summary, loading }: { summary: AISummary | null; loading:
       <div className="relative">
         <div className="flex items-center gap-2 mb-3">
           <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/20 text-xs">✦</span>
-          <p className="text-xs font-semibold tracking-wide opacity-80 uppercase">今週の福山 AI まとめ</p>
+          <p className="text-xs font-semibold tracking-wide opacity-80 uppercase">AI まとめ</p>
         </div>
-        {loading ? (
+
+        {/* タブ */}
+        <div className="flex gap-1 mb-4 bg-white/10 rounded-xl p-1">
+          {SUMMARY_TABS.map(t => (
+            <button
+              key={t.value}
+              onClick={() => handleTab(t.value)}
+              className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                tab === t.value ? 'bg-white text-blue-700' : 'text-white/70 hover:text-white'
+              }`}
+            >
+              <span>{t.emoji}</span>
+              <span className="hidden sm:inline">{t.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {displayLoading ? (
           <div className="space-y-2.5">
             <div className="h-5 bg-white/20 rounded-lg animate-pulse w-3/4" />
             <div className="h-3 bg-white/10 rounded animate-pulse w-full" />
             <div className="h-3 bg-white/10 rounded animate-pulse w-5/6" />
-            <div className="h-3 bg-white/10 rounded animate-pulse w-4/5" />
           </div>
         ) : (
           <>
-            <p className="text-lg font-bold leading-snug mb-4">{summary?.highlight}</p>
+            <p className="text-base font-bold leading-snug mb-3">{displaySummary?.highlight}</p>
             <div className="space-y-2">
-              {summary?.items.map(s => (
+              {displaySummary?.items.map(s => (
                 <div key={s.category} className="flex items-start gap-2.5 text-sm">
                   <span className="mt-0.5 shrink-0 rounded-md bg-white/20 px-2 py-0.5 text-xs font-semibold">
                     {s.category}
@@ -321,12 +372,16 @@ export default function Home() {
           </>
         )}
 
+        {/* 福山市インフォ */}
+        <FukuyamaInfo />
+
         <p className="text-center text-xs text-gray-300 dark:text-slate-700 pb-2">
           RSS · Google News · Claude AI から自動収集
         </p>
       </main>
 
       <BottomNav active={category} onChange={setCategory} counts={counts} />
+      <ToastContainer />
     </div>
   );
 }

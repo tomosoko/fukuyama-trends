@@ -319,9 +319,18 @@ export default function Home() {
         {/* 最注目記事ヒーロー（サムネイル付き HOT 記事の1件目） */}
         {!loadingItems && !showFavs && !search && category === 'all' && (() => {
           const hero = items.find(i => i.thumbnail && (i.hotScore ?? 0) >= 40);
-          return hero ? <FeaturedCard item={hero} /> : null;
+          const picks = [...items]
+            .sort((a, b) => (b.hotScore ?? 0) - (a.hotScore ?? 0))
+            .filter(i => i.id !== hero?.id)
+            .slice(0, 5);
+          return (
+            <>
+              {hero && <FeaturedCard item={hero} />}
+              {picks.length > 0 && <TopPicks items={picks} />}
+            </>
+          );
         })()}
-        {!loadingItems && !showFavs && <TopPicks items={items.slice(0, 5)} />}
+        {!loadingItems && !showFavs && (category !== 'all' || search) && <TopPicks items={[...items].sort((a, b) => (b.hotScore ?? 0) - (a.hotScore ?? 0)).slice(0, 5)} />}
         {!loadingItems && <StatsBar items={items} updatedAt={updatedAt} />}
 
         <div className="hidden sm:block">

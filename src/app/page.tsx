@@ -11,8 +11,10 @@ import { BottomNav } from '@/components/BottomNav';
 import { DateFilter, DateRange, filterByDate } from '@/components/DateFilter';
 import { StatsBar } from '@/components/StatsBar';
 import { SortSelect, SortOrder } from '@/components/SortSelect';
+import { TimelineView } from '@/components/TimelineView';
 import { useDebounce } from '@/lib/useDebounce';
 import { useDarkMode } from '@/lib/useDarkMode';
+import { useScrolled } from '@/lib/useScrolled';
 import { getFavorites } from '@/lib/favorites';
 
 const PAGE_SIZE = 12;
@@ -102,6 +104,7 @@ function sortItems(items: TrendItem[], order: SortOrder): TrendItem[] {
 // ---- メインページ ----
 export default function Home() {
   const { theme, toggle: toggleDark } = useDarkMode();
+  const scrolled = useScrolled(40);
 
   const [items, setItems] = useState<TrendItem[]>([]);
   const [summary, setSummary] = useState<AISummary | null>(null);
@@ -118,6 +121,7 @@ export default function Home() {
   const [refreshing, setRefreshing] = useState(false);
   const [showFavs, setShowFavs] = useState(false);
   const [favIds, setFavIds] = useState<Set<string>>(new Set());
+  const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
 
   useEffect(() => {
     setFavIds(getFavorites());
@@ -174,8 +178,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors">
       {/* ヘッダー */}
-      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-100 dark:border-slate-800 sticky top-0 z-20">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
+      <header className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-100 dark:border-slate-800 sticky top-0 z-20 transition-all duration-300 ${scrolled ? 'shadow-sm' : ''}`}>
+        <div className={`max-w-2xl mx-auto px-4 flex items-center gap-3 transition-all duration-300 ${scrolled ? 'h-11' : 'h-14'}`}>
           <div className="flex items-center gap-2.5 flex-1 min-w-0">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white text-sm font-bold shadow-sm shadow-blue-200">
               福
@@ -230,7 +234,30 @@ export default function Home() {
         {/* フィルター行 */}
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <DateFilter active={dateRange} onChange={setDateRange} />
-          <SortSelect value={sortOrder} onChange={setSortOrder} />
+          <div className="flex items-center gap-2 ml-auto">
+            {/* ビュー切替 */}
+            <div className="flex border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`px-2.5 py-1.5 text-xs transition-colors ${viewMode === 'grid' ? 'bg-gray-900 dark:bg-slate-100 text-white dark:text-slate-900' : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                title="グリッド表示"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setViewMode('timeline')}
+                className={`px-2.5 py-1.5 text-xs border-l border-gray-200 dark:border-slate-700 transition-colors ${viewMode === 'timeline' ? 'bg-gray-900 dark:bg-slate-100 text-white dark:text-slate-900' : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                title="タイムライン表示"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+            </div>
+            <SortSelect value={sortOrder} onChange={setSortOrder} />
+          </div>
         </div>
 
         {showFavs && (
@@ -258,21 +285,25 @@ export default function Home() {
           <EmptyState search={searchRaw} onClear={() => setSearchRaw('')} />
         ) : (
           <>
-            {/* マガジン風レイアウト: 画像あり → ビッグカード、なし → コンパクト */}
-            <div className="space-y-3">
-              {visible.map(item => (
-                <TrendCard key={item.id} item={item} search={search} />
-              ))}
-            </div>
-
-            {/* もっと見る */}
-            {hasMore && (
-              <button
-                onClick={() => setPage(p => p + 1)}
-                className="w-full py-3.5 rounded-xl border-2 border-dashed border-gray-200 dark:border-slate-700 text-sm font-medium text-gray-400 dark:text-slate-500 hover:border-blue-300 hover:text-blue-500 transition-colors"
-              >
-                もっと見る — あと {filtered.length - visible.length} 件
-              </button>
+            {viewMode === 'timeline' ? (
+              <TimelineView items={filtered} search={search} />
+            ) : (
+              <>
+                <div className="space-y-3">
+                  {visible.map(item => (
+                    <TrendCard key={item.id} item={item} search={search} />
+                  ))}
+                </div>
+                {/* もっと見る */}
+                {hasMore && (
+                  <button
+                    onClick={() => setPage(p => p + 1)}
+                    className="w-full py-3.5 rounded-xl border-2 border-dashed border-gray-200 dark:border-slate-700 text-sm font-medium text-gray-400 dark:text-slate-500 hover:border-blue-300 hover:text-blue-500 transition-colors"
+                  >
+                    もっと見る — あと {filtered.length - visible.length} 件
+                  </button>
+                )}
+              </>
             )}
           </>
         )}

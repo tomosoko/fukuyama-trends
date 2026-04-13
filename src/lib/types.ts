@@ -9,6 +9,7 @@ export interface TrendItem {
   category: Exclude<Category, 'all'>;
   publishedAt?: string;
   thumbnail?: string;
+  hotScore?: number;
 }
 
 export interface AISummary {

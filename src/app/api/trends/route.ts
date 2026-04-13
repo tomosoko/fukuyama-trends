@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { fetchRssItems } from '@/lib/rss';
 import { fetchWebSearchItems } from '@/lib/web-search';
 import { enrichWithThumbnails } from '@/lib/og-image';
+import { enrichWithScore } from '@/lib/hot-score';
 import { getCached, setCached } from '@/lib/cache';
 import { TrendItem } from '@/lib/types';
 
@@ -34,6 +35,9 @@ export async function GET() {
     // OG画像を並列取得（上位20件）
     const top = await enrichWithThumbnails(all.slice(0, 20));
     all = [...top, ...all.slice(20)];
+
+    // ホットスコア付与
+    all = enrichWithScore(all);
 
     setCached('trends', all, TTL);
     return NextResponse.json(all, { headers: { 'X-Cache': 'MISS' } });

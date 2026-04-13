@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { TrendItem } from '@/lib/types';
 import { getFavorites, toggleFavorite } from '@/lib/favorites';
+import { getReadIds, markAsRead } from '@/lib/read-history';
 import { highlight } from './SearchBar';
 
 const CATEGORY_CONFIG = {
@@ -33,14 +34,14 @@ async function shareItem(item: TrendItem) {
 }
 
 // 画像付きビッグカード
-function BigCard({ item, search, fav, onFav }: CardProps) {
+function BigCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
   const cfg = CATEGORY_CONFIG[item.category];
   const date = formatDate(item.publishedAt);
 
   return (
-    <article className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-slate-700 hover:shadow-xl hover:shadow-gray-200/60 dark:hover:shadow-slate-900/40 transition-all duration-300">
+    <article className={`group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-slate-700 hover:shadow-xl hover:shadow-gray-200/60 dark:hover:shadow-slate-900/40 transition-all duration-300 ${isRead ? 'opacity-70' : ''}`}>
       {/* 画像エリア */}
-      <a href={item.url || '#'} target="_blank" rel="noopener noreferrer" className="block relative h-48 sm:h-56 overflow-hidden bg-gray-100 dark:bg-slate-700">
+      <a href={item.url || '#'} target="_blank" rel="noopener noreferrer" onClick={onRead} className="block relative h-48 sm:h-56 overflow-hidden bg-gray-100 dark:bg-slate-700">
         {item.thumbnail && (
           <Image
             src={item.thumbnail}
@@ -54,6 +55,12 @@ function BigCard({ item, search, fav, onFav }: CardProps) {
         <span className={`absolute top-3 left-3 ${cfg.color} text-white text-xs font-bold px-2.5 py-1 rounded-full shadow`}>
           {cfg.label}
         </span>
+        {/* HOTバッジ */}
+        {(item.hotScore ?? 0) >= 60 && (
+          <span className="absolute top-3 right-3 bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow flex items-center gap-1">
+            🔥 HOT
+          </span>
+        )}
         {/* グラデーションオーバーレイ */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
       </a>
@@ -104,17 +111,20 @@ function BigCard({ item, search, fav, onFav }: CardProps) {
 }
 
 // 画像なしコンパクトカード
-function SmallCard({ item, search, fav, onFav }: CardProps) {
+function SmallCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
   const cfg = CATEGORY_CONFIG[item.category];
   const date = formatDate(item.publishedAt);
 
   return (
-    <article className="group bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-3.5 flex gap-3 hover:border-gray-200 dark:hover:border-slate-600 hover:shadow-md hover:shadow-gray-100 dark:hover:shadow-slate-900/30 transition-all duration-200">
+    <article className={`group bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-3.5 flex gap-3 hover:border-gray-200 dark:hover:border-slate-600 hover:shadow-md hover:shadow-gray-100 dark:hover:shadow-slate-900/30 transition-all duration-200 ${isRead ? 'opacity-60' : ''}`}>
       {/* カテゴリライン */}
       <div className={`w-1 rounded-full shrink-0 ${cfg.color}`} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.light}`}>{cfg.label}</span>
+          {(item.hotScore ?? 0) >= 60 && (
+            <span className="text-xs font-bold text-rose-500">🔥</span>
+          )}
           <span className="text-xs text-gray-400 dark:text-slate-500 truncate">{item.source}</span>
           {date && <span className="text-xs text-gray-300 dark:text-slate-600 ml-auto shrink-0">{date}</span>}
         </div>
@@ -136,7 +146,7 @@ function SmallCard({ item, search, fav, onFav }: CardProps) {
           </svg>
         </button>
         {item.url && (
-          <a href={item.url} target="_blank" rel="noopener noreferrer"
+          <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={onRead}
             className="p-1 text-gray-300 hover:text-blue-400 transition-colors">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -153,15 +163,22 @@ interface CardProps {
   item: TrendItem;
   search: string;
   fav: boolean;
+  isRead: boolean;
   onFav: () => void;
+  onRead: () => void;
 }
 
 export function TrendCard({ item, search = '' }: { item: TrendItem; search?: string }) {
   const [fav, setFav] = useState(false);
-  useEffect(() => { setFav(getFavorites().has(item.id)); }, [item.id]);
+  const [isRead, setIsRead] = useState(false);
+  useEffect(() => {
+    setFav(getFavorites().has(item.id));
+    setIsRead(getReadIds().has(item.id));
+  }, [item.id]);
   const handleFav = () => setFav(toggleFavorite(item.id));
+  const handleRead = () => { markAsRead(item.id); setIsRead(true); };
 
-  const props: CardProps = { item, search, fav, onFav: handleFav };
+  const props: CardProps = { item, search, fav, isRead, onFav: handleFav, onRead: handleRead };
   return item.thumbnail
     ? <BigCard {...props} />
     : <SmallCard {...props} />;

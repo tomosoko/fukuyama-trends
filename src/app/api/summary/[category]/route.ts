@@ -28,7 +28,7 @@ export async function GET(
   if (cached) return NextResponse.json(cached, { headers: { 'X-Cache': 'HIT' } });
 
   const allItems = getCached<TrendItem[]>('trends') ?? [];
-  const items = allItems.filter(i => i.category === cat).slice(0, 10);
+  const items = allItems.filter(i => i.category === cat).slice(0, 15);
 
   if (items.length === 0) {
     const fallback: AISummary = {
@@ -39,24 +39,27 @@ export async function GET(
   }
 
   try {
+    const now = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
     const itemsText = items
-      .map(i => `・${i.title}: ${i.summary.slice(0, 80)}`)
+      .map((i, idx) => `${idx + 1}. ${i.title}${i.summary ? `\n   → ${i.summary.slice(0, 100)}` : ''}`)
       .join('\n');
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 400,
+      max_tokens: 500,
       messages: [{
         role: 'user',
-        content: `以下は福山市の「${LABELS[cat]}」情報です。簡潔にまとめてください。
+        content: `あなたは福山市（広島県）の地域情報キュレーターです。${now}時点の「${LABELS[cat]}」情報を分析し、市民に最も役立つポイントをまとめてください。
 
+【${LABELS[cat]}情報一覧】
 ${itemsText}
 
-JSON形式で（マークダウンなし）:
+以下のJSON形式のみで返答してください（前後にマークダウンや説明文を一切含めないこと）:
 {
-  "highlight": "一言まとめ（40文字以内）",
+  "highlight": "${LABELS[cat]}の今の注目ポイント（具体的な名称・場所を含む、40文字以内）",
   "items": [
-    { "category": "${LABELS[cat]}", "text": "ポイント（50文字以内）" }
+    { "category": "注目1", "text": "具体的な情報（店名・場所・日程を含む、65文字以内）" },
+    { "category": "注目2", "text": "具体的な情報（65文字以内）" }
   ]
 }`,
       }],

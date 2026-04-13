@@ -16,6 +16,7 @@ import { ToastContainer } from '@/components/Toast';
 import { FukuyamaInfo } from '@/components/FukuyamaInfo';
 import { KeyboardHelp } from '@/components/KeyboardHelp';
 import { ScrollToTop } from '@/components/ScrollToTop';
+import { FeaturedCard } from '@/components/FeaturedCard';
 import { useDebounce } from '@/lib/useDebounce';
 import { useDarkMode } from '@/lib/useDarkMode';
 import { useScrolled } from '@/lib/useScrolled';
@@ -290,6 +291,11 @@ export default function Home() {
 
       <main className="max-w-2xl mx-auto px-4 py-5 pb-24 sm:pb-8 space-y-4">
         <SummaryCard summary={summary} loading={loadingSummary} />
+        {/* 最注目記事ヒーロー（サムネイル付き HOT 記事の1件目） */}
+        {!loadingItems && !showFavs && !search && category === 'all' && (() => {
+          const hero = items.find(i => i.thumbnail && (i.hotScore ?? 0) >= 40);
+          return hero ? <FeaturedCard item={hero} /> : null;
+        })()}
         {!loadingItems && !showFavs && <TopPicks items={items.slice(0, 5)} />}
         {!loadingItems && <StatsBar items={items} updatedAt={updatedAt} />}
 

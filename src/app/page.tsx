@@ -258,7 +258,8 @@ export default function Home() {
           <EmptyState search={searchRaw} onClear={() => setSearchRaw('')} />
         ) : (
           <>
-            <div className="grid gap-3">
+            {/* マガジン風レイアウト: 画像あり → ビッグカード、なし → コンパクト */}
+            <div className="space-y-3">
               {visible.map(item => (
                 <TrendCard key={item.id} item={item} search={search} />
               ))}
@@ -268,9 +269,9 @@ export default function Home() {
             {hasMore && (
               <button
                 onClick={() => setPage(p => p + 1)}
-                className="w-full py-3 rounded-xl border border-gray-200 dark:border-slate-700 text-sm font-medium text-gray-500 dark:text-slate-400 hover:border-blue-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                className="w-full py-3.5 rounded-xl border-2 border-dashed border-gray-200 dark:border-slate-700 text-sm font-medium text-gray-400 dark:text-slate-500 hover:border-blue-300 hover:text-blue-500 transition-colors"
               >
-                もっと見る ({filtered.length - visible.length} 件)
+                もっと見る — あと {filtered.length - visible.length} 件
               </button>
             )}
           </>

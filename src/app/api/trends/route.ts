@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { fetchRssItems } from '@/lib/rss';
 import { fetchWebSearchItems } from '@/lib/web-search';
+import { enrichWithThumbnails } from '@/lib/og-image';
 import { getCached, setCached } from '@/lib/cache';
 import { TrendItem } from '@/lib/types';
 
@@ -18,17 +19,21 @@ export async function GET() {
       fetchWebSearchItems(),
     ]);
 
-    const all: TrendItem[] = [
+    let all: TrendItem[] = [
       ...(rssResult.status === 'fulfilled' ? rssResult.value : []),
       ...(searchResult.status === 'fulfilled' ? searchResult.value : []),
     ];
 
-    // 日時でソート（新着順）、日時なしは末尾
+    // 日時降順ソート
     all.sort((a, b) => {
       if (!a.publishedAt) return 1;
       if (!b.publishedAt) return -1;
       return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
     });
+
+    // OG画像を並列取得（上位20件）
+    const top = await enrichWithThumbnails(all.slice(0, 20));
+    all = [...top, ...all.slice(20)];
 
     setCached('trends', all, TTL);
     return NextResponse.json(all, { headers: { 'X-Cache': 'MISS' } });

@@ -10,40 +10,24 @@ export const RSS_SOURCES: RssSource[] = [
     url: 'https://www.city.fukuyama.hiroshima.jp/rss/siteinfo.rdf',
     category: 'events',
   },
-  {
-    name: '広島県観光情報',
-    url: 'https://www.kankou.pref.hiroshima.jp/rss/news.xml',
-    category: 'events',
-  },
-  {
-    name: '中国新聞',
-    url: 'https://www.chugoku-np.co.jp/rss/local.xml',
-    category: 'trends',
-  },
-  {
-    name: 'じゃらん 福山',
-    url: 'https://www.jalan.net/rss/sightseeing/250000.rss',
-    category: 'gourmet',
-  },
 ];
 
-export const SEARCH_KEYWORDS: Record<string, { query: string; category: 'gourmet' | 'events' | 'trends' }[]> = {
-  gourmet: [
-    { query: '福山市 ランチ 人気 2026', category: 'gourmet' },
-    { query: '福山 グルメ おすすめ 新店', category: 'gourmet' },
-    { query: '福山市 カフェ 話題', category: 'gourmet' },
-    { query: '福山 居酒屋 ランキング', category: 'gourmet' },
-  ],
-  events: [
-    { query: '福山市 イベント 2026', category: 'events' },
-    { query: '福山 観光 春 スポット', category: 'events' },
-    { query: '福山城 イベント', category: 'events' },
-    { query: '福山市 祭り 花見', category: 'events' },
-  ],
-  trends: [
-    { query: '福山市 話題 ニュース', category: 'trends' },
-    { query: '福山 SNS 話題 スポット', category: 'trends' },
-    { query: '福山市 新規オープン', category: 'trends' },
-    { query: '福山 インスタ映え', category: 'trends' },
-  ],
-};
+// Google News RSS — 「福山市」必須で検索して広島全域の混入を防ぐ
+export const SEARCH_KEYWORDS: { query: string; category: 'gourmet' | 'events' | 'trends' }[] = [
+  // グルメ
+  { query: '福山市 グルメ ランチ',          category: 'gourmet' },
+  { query: '福山市 カフェ 新規オープン',     category: 'gourmet' },
+  { query: '福山市 居酒屋 人気',            category: 'gourmet' },
+  { query: '福山市 ラーメン おすすめ',       category: 'gourmet' },
+  { query: '福山市 スイーツ カフェ',         category: 'gourmet' },
+  // イベント
+  { query: '福山市 イベント 2026',           category: 'events' },
+  { query: '福山市 お祭り 花見',             category: 'events' },
+  { query: '福山城 イベント',                category: 'events' },
+  { query: '福山市 コンサート ライブ',        category: 'events' },
+  // トレンド
+  { query: '福山市 話題 ニュース',           category: 'trends' },
+  { query: '福山市 新規オープン 店舗',        category: 'trends' },
+  { query: '福山市 インスタグラム 人気',      category: 'trends' },
+  { query: '福山市 観光 スポット 2026',       category: 'trends' },
+];

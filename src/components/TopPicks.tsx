@@ -1,17 +1,18 @@
 'use client';
 
+import Image from 'next/image';
 import { TrendItem } from '@/lib/types';
 
-const EMOJI: Record<TrendItem['category'], string> = {
-  gourmet: '🍜',
-  events: '🎪',
-  trends: '🔥',
+const CATEGORY_COLORS: Record<TrendItem['category'], string> = {
+  gourmet: 'from-orange-500 to-amber-600',
+  events:  'from-blue-500 to-cyan-600',
+  trends:  'from-violet-500 to-purple-700',
 };
 
-const GRAD: Record<TrendItem['category'], string> = {
-  gourmet: 'from-orange-400 to-amber-500',
-  events:  'from-blue-400 to-cyan-500',
-  trends:  'from-violet-400 to-purple-600',
+const CATEGORY_EMOJI: Record<TrendItem['category'], string> = {
+  gourmet: '🍜',
+  events:  '🎪',
+  trends:  '🔥',
 };
 
 export function TopPicks({ items }: { items: TrendItem[] }) {
@@ -20,31 +21,41 @@ export function TopPicks({ items }: { items: TrendItem[] }) {
 
   return (
     <section>
-      <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3 px-0.5">
-        ✦ 注目ピックス
-      </h2>
-      <div className="scroll-x flex gap-3 pb-2 -mx-4 px-4">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest">注目ピックス</span>
+        <div className="flex-1 h-px bg-gray-100 dark:bg-slate-800" />
+      </div>
+      <div className="scroll-x flex gap-3 -mx-4 px-4 pb-2">
         {picks.map((item, i) => (
           <a
             key={item.id}
             href={item.url || '#'}
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 w-52 rounded-2xl overflow-hidden shadow-md shadow-gray-200/60 hover:shadow-xl hover:shadow-gray-200/80 hover:-translate-y-0.5 transition-all duration-200"
+            className="shrink-0 w-44 rounded-2xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white dark:bg-slate-800"
           >
-            {/* グラデーションヘッダー */}
-            <div className={`bg-gradient-to-br ${GRAD[item.category]} p-4 pb-3`}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-2xl">{EMOJI[item.category]}</span>
-                <span className="text-white/80 text-xs font-bold">#{i + 1}</span>
-              </div>
+            {/* 画像 or グラデーション */}
+            <div className={`relative h-28 bg-gradient-to-br ${CATEGORY_COLORS[item.category]}`}>
+              {item.thumbnail && (
+                <Image
+                  src={item.thumbnail}
+                  alt={item.title}
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              <span className="absolute top-2 left-2 text-xl">{CATEGORY_EMOJI[item.category]}</span>
+              <span className="absolute top-2 right-2 bg-black/30 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                #{i + 1}
+              </span>
             </div>
-            {/* コンテンツ */}
-            <div className="bg-white dark:bg-slate-800 p-3">
-              <p className="text-xs font-semibold text-gray-900 dark:text-slate-100 line-clamp-3 leading-snug mb-1.5">
+            <div className="p-2.5">
+              <p className="text-xs font-semibold text-gray-900 dark:text-slate-100 line-clamp-3 leading-snug">
                 {item.title}
               </p>
-              <p className="text-xs text-gray-400 dark:text-slate-500">{item.source}</p>
+              <p className="text-xs text-gray-400 dark:text-slate-500 mt-1 truncate">{item.source}</p>
             </div>
           </a>
         ))}

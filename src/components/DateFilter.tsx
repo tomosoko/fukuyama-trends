@@ -28,8 +28,8 @@ export function DateFilter({
           onClick={() => onChange(opt.value)}
           className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
             active === opt.value
-              ? 'bg-gray-900 text-white'
-              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+              ? 'bg-gray-900 dark:bg-slate-100 text-white dark:text-slate-900'
+              : 'text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-700 dark:hover:text-slate-200'
           }`}
         >
           {opt.label}

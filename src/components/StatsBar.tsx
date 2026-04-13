@@ -2,7 +2,7 @@
 
 import { TrendItem } from '@/lib/types';
 import { HOT_THRESHOLD } from '@/lib/hot-score';
-import { getReadIds } from '@/lib/read-history';
+import { getReadIds, clearReadHistory } from '@/lib/read-history';
 import { useState, useEffect } from 'react';
 
 function formatUpdatedAt(updatedAt: Date): string {
@@ -57,6 +57,13 @@ export function StatsBar({ items, updatedAt }: { items: TrendItem[]; updatedAt: 
         <>
           <span className="text-gray-200 dark:text-slate-700">|</span>
           <span className="shrink-0">既読 {readCount}</span>
+          <button
+            onClick={() => { clearReadHistory(); setReadCount(0); }}
+            className="shrink-0 text-[10px] text-gray-300 dark:text-slate-600 hover:text-gray-500 dark:hover:text-slate-400 transition-colors"
+            title="既読履歴をクリア"
+          >
+            クリア
+          </button>
         </>
       )}
       {updatedAt && (

@@ -19,3 +19,7 @@ export function markAsRead(id: string): void {
   if (arr.length > MAX) arr.splice(0, arr.length - MAX);
   localStorage.setItem(KEY, JSON.stringify(arr));
 }
+
+export function clearReadHistory(): void {
+  localStorage.removeItem(KEY);
+}

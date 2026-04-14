@@ -278,10 +278,12 @@ export default function Home() {
   useEffect(() => { setPage(1); }, [category, search, dateRange, sortOrder, showFavs]);
 
   const counts = useMemo(() => {
-    const base = { all: items.length, gourmet: 0, events: 0, trends: 0 } as Record<Category, number>;
-    for (const item of items) base[item.category]++;
+    // お気に入りフィルター時はfavorite件数でカウント
+    const src = showFavs ? items.filter(i => favIds.has(i.id)) : items;
+    const base = { all: src.length, gourmet: 0, events: 0, trends: 0 } as Record<Category, number>;
+    for (const item of src) base[item.category]++;
     return base;
-  }, [items]);
+  }, [items, showFavs, favIds]);
 
   const filtered = useMemo(() => {
     let src = showFavs ? items.filter(i => favIds.has(i.id)) : items;

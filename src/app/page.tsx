@@ -20,6 +20,7 @@ import { ScrollToTop } from '@/components/ScrollToTop';
 import { FeaturedCard } from '@/components/FeaturedCard';
 import { InstallPrompt } from '@/components/InstallPrompt';
 import { TrendingKeywords } from '@/components/TrendingKeywords';
+import { ArticleModal } from '@/components/ArticleModal';
 import { useDebounce } from '@/lib/useDebounce';
 import { useDarkMode } from '@/lib/useDarkMode';
 import { useScrolled } from '@/lib/useScrolled';
@@ -183,6 +184,7 @@ export default function Home() {
   const [favIds, setFavIds] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
   const [helpOpen, setHelpOpen] = useState(false);
+  const [previewItem, setPreviewItem] = useState<TrendItem | null>(null);
 
   useEffect(() => {
     setFavIds(getFavorites());
@@ -402,7 +404,7 @@ export default function Home() {
                 <div className="space-y-3">
                   {visible.map((item, i) => (
                     <div key={item.id} className={`stagger-item animate-fade-in-up`} style={{ animationDelay: `${Math.min(i, 11) * 50}ms` }}>
-                      <TrendCard item={item} search={search} />
+                      <TrendCard item={item} search={search} onPreview={() => setPreviewItem(item)} />
                     </div>
                   ))}
                 </div>
@@ -433,6 +435,7 @@ export default function Home() {
       <KeyboardHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
       <ScrollToTop />
       <InstallPrompt />
+      <ArticleModal item={previewItem} onClose={() => setPreviewItem(null)} />
     </div>
   );
 }

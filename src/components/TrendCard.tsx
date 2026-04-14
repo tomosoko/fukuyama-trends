@@ -137,7 +137,7 @@ function BigCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
 }
 
 // 画像なしコンパクトカード
-function SmallCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
+function SmallCard({ item, search, fav, isRead, onFav, onRead, onPreview }: CardProps) {
   const cfg = CATEGORY_CONFIG[item.category];
   const date = formatDate(item.publishedAt);
   const showNew = !isRead && isNew(item.publishedAt);
@@ -159,10 +159,12 @@ function SmallCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
           {date && <span className="text-xs text-gray-300 dark:text-slate-600 ml-auto shrink-0">{date}</span>}
         </div>
         <h3 className="font-semibold text-gray-900 dark:text-slate-100 text-sm leading-snug mb-1 line-clamp-2">
-          {item.url
-            ? <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={onRead} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{highlight(item.title, search)}</a>
-            : highlight(item.title, search)
-          }
+          <button
+            onClick={onPreview ?? onRead}
+            className="text-left hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-full"
+          >
+            {highlight(item.title, search)}
+          </button>
         </h3>
         {item.summary && (
           <p className="text-xs text-gray-500 dark:text-slate-400 line-clamp-1 leading-relaxed">
@@ -199,9 +201,10 @@ interface CardProps {
   isRead: boolean;
   onFav: () => void;
   onRead: () => void;
+  onPreview?: () => void;
 }
 
-export function TrendCard({ item, search = '' }: { item: TrendItem; search?: string }) {
+export function TrendCard({ item, search = '', onPreview }: { item: TrendItem; search?: string; onPreview?: () => void }) {
   const [fav, setFav] = useState(false);
   const [isRead, setIsRead] = useState(false);
   useEffect(() => {
@@ -211,7 +214,7 @@ export function TrendCard({ item, search = '' }: { item: TrendItem; search?: str
   const handleFav = () => setFav(toggleFavorite(item.id));
   const handleRead = () => { markAsRead(item.id); setIsRead(true); };
 
-  const props: CardProps = { item, search, fav, isRead, onFav: handleFav, onRead: handleRead };
+  const props: CardProps = { item, search, fav, isRead, onFav: handleFav, onRead: handleRead, onPreview };
   return item.thumbnail
     ? <BigCard {...props} />
     : <SmallCard {...props} />;

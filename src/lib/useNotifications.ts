@@ -1,28 +1,28 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { TrendItem } from './types';
 import { HOT_THRESHOLD } from './hot-score';
 
 export function useNotifications(items: TrendItem[]) {
   const notifiedIds = useRef<Set<string>>(new Set());
-  const permissionRef = useRef<NotificationPermission>('default');
+  const [permission, setPermission] = useState<NotificationPermission>('default');
 
   useEffect(() => {
     if (typeof Notification === 'undefined') return;
-    permissionRef.current = Notification.permission;
+    setPermission(Notification.permission);
   }, []);
 
   const requestPermission = useCallback(async () => {
     if (typeof Notification === 'undefined') return false;
     const result = await Notification.requestPermission();
-    permissionRef.current = result;
+    setPermission(result);
     return result === 'granted';
   }, []);
 
   useEffect(() => {
     if (typeof Notification === 'undefined') return;
-    if (permissionRef.current !== 'granted') return;
+    if (permission !== 'granted') return;
 
     // HOTな新着記事で未通知のものを通知
     const hotNew = items.filter(item => {
@@ -47,7 +47,7 @@ export function useNotifications(items: TrendItem[]) {
         }
       } catch { /* ignore */ }
     });
-  }, [items]);
+  }, [items, permission]);
 
-  return { requestPermission, permission: permissionRef.current };
+  return { requestPermission, permission };
 }

@@ -27,7 +27,20 @@ export async function GET() {
     setCached('trends', items, TRENDS_TTL);
   }
 
-  const summary = await generateSummary(items);
-  setCached('summary', summary, SUMMARY_TTL);
-  return NextResponse.json(summary, { headers: { 'X-Cache': 'MISS' } });
+  try {
+    const summary = await generateSummary(items);
+    setCached('summary', summary, SUMMARY_TTL);
+    return NextResponse.json(summary, { headers: { 'X-Cache': 'MISS' } });
+  } catch (err) {
+    console.error('[/api/summary]', err);
+    const fallback: AISummary = {
+      highlight: '福山の最新情報をお届けします',
+      items: [
+        { category: 'グルメ', text: '人気グルメ情報をチェック' },
+        { category: 'イベント', text: '最新イベント情報' },
+        { category: 'トレンド', text: '話題のスポット情報' },
+      ],
+    };
+    return NextResponse.json(fallback, { status: 200 });
+  }
 }

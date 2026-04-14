@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TrendItem } from '@/lib/types';
 import { HOT_THRESHOLD } from '@/lib/hot-score';
 import { getFavorites, toggleFavorite } from '@/lib/favorites';
@@ -45,26 +45,55 @@ interface ArticleModalProps {
   onNavigate?: (item: TrendItem) => void;
 }
 
+function readingTimeMin(text: string): number {
+  const chars = text.replace(/\s/g, '').length;
+  return Math.max(1, Math.round(chars / 400)); // 日本語: ~400字/分
+}
+
 export function ArticleModal({ item, allItems = [], onClose, onNavigate }: ArticleModalProps) {
   const [fav, setFav] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [scrollPct, setScrollPct] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef<number | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!item) return;
     setImgError(false);
+    setScrollPct(0);
     setFav(getFavorites().has(item.id));
     markAsRead(item.id);
   }, [item]);
 
+  // スクロール進捗
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || !item) return;
+    const onScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = el;
+      const max = scrollHeight - clientHeight;
+      setScrollPct(max > 0 ? Math.min(100, Math.round((scrollTop / max) * 100)) : 100);
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [item]);
+
   const related = item ? findRelated(item, allItems) : [];
 
-  // キーボードで閉じる
+  // キーボード操作（Esc: 閉じる、←→: 関連記事ナビ）
   useEffect(() => {
     if (!item) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { onClose(); return; }
+      if (!onNavigate) return;
+      const related = findRelated(item, allItems);
+      if (e.key === 'ArrowRight' && related[0]) onNavigate(related[0]);
+      if (e.key === 'ArrowLeft'  && related[1]) onNavigate(related[1]);
+    };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [item, onClose]);
+  }, [item, allItems, onClose, onNavigate]);
 
   // 開いている間はスクロール無効
   useEffect(() => {
@@ -79,6 +108,7 @@ export function ArticleModal({ item, allItems = [], onClose, onNavigate }: Artic
   const date = formatDate(item.publishedAt);
   const isHot = (item.hotScore ?? 0) >= HOT_THRESHOLD;
   const showImg = item.thumbnail && !imgError;
+  const readMin = readingTimeMin((item.summary ?? '') + item.title);
 
   const handleFav = () => setFav(toggleFavorite(item.id));
   const handleShare = async () => {
@@ -98,9 +128,28 @@ export function ArticleModal({ item, allItems = [], onClose, onNavigate }: Artic
       onClick={onClose}
     >
       <div
+        ref={panelRef}
         className="bg-white dark:bg-slate-800 w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
+        onTouchStart={e => { touchStartY.current = e.touches[0].clientY; }}
+        onTouchEnd={e => {
+          if (touchStartY.current === null) return;
+          const dy = e.changedTouches[0].clientY - touchStartY.current;
+          if (dy > 80) onClose();
+          touchStartY.current = null;
+        }}
       >
+        {/* ドラッグハンドル（モバイル） */}
+        <div className="flex justify-center pt-2.5 pb-1 sm:hidden shrink-0">
+          <div className="w-10 h-1 bg-gray-200 dark:bg-slate-600 rounded-full" />
+        </div>
+        {/* 読書進捗バー */}
+        <div className="h-0.5 bg-gray-100 dark:bg-slate-700 shrink-0">
+          <div
+            className="h-full bg-blue-500 transition-all duration-150"
+            style={{ width: `${scrollPct}%` }}
+          />
+        </div>
         {/* 画像エリア */}
         <div className={`relative h-48 bg-gradient-to-br ${cfg.gradient} shrink-0`}>
           {showImg && (
@@ -142,11 +191,13 @@ export function ArticleModal({ item, allItems = [], onClose, onNavigate }: Artic
         </div>
 
         {/* コンテンツ */}
-        <div className="overflow-y-auto flex-1 p-5">
+        <div ref={scrollRef} className="overflow-y-auto flex-1 p-5">
           {/* メタ情報 */}
           <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-slate-500 mb-3">
             <span className="font-medium text-gray-600 dark:text-slate-300">{item.source}</span>
             {date && <><span>·</span><span>{date}</span></>}
+            <span>·</span>
+            <span>約{readMin}分</span>
             {item.hotScore !== undefined && (
               <span className="ml-auto text-[11px] bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
                 HOT {item.hotScore}

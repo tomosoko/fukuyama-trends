@@ -33,6 +33,7 @@ import { useKeyboard } from '@/lib/useKeyboard';
 import { getFavorites } from '@/lib/favorites';
 import { useInfiniteScroll } from '@/lib/useInfiniteScroll';
 import { useNotifications } from '@/lib/useNotifications';
+import { TopSources } from '@/components/TopSources';
 
 const PAGE_SIZE = 12;
 
@@ -367,7 +368,7 @@ export default function Home() {
             .slice(0, 5);
           return (
             <>
-              {hero && <FeaturedCard item={hero} />}
+              {hero && <FeaturedCard item={hero} onPreview={() => setPreviewItem(hero)} />}
               {picks.length > 0 && <TopPicks items={picks} />}
             </>
           );
@@ -378,6 +379,9 @@ export default function Home() {
         )}
         {!loadingItems && !showFavs && !search && category === 'all' && items.length > 0 && (
           <CategoryRanking items={items} onPreview={setPreviewItem} />
+        )}
+        {!loadingItems && !showFavs && !search && category === 'all' && items.length > 0 && (
+          <TopSources items={items} />
         )}
         {!loadingItems && <StatsBar items={items} updatedAt={updatedAt} />}
         <DailyHeader />

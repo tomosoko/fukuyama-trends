@@ -11,18 +11,16 @@ const CATEGORY_CONFIG = {
   trends:  { label: 'トレンド', emoji: '🔥', gradient: 'from-violet-500 to-purple-700'},
 };
 
-export function FeaturedCard({ item }: { item: TrendItem }) {
+export function FeaturedCard({ item, onPreview }: { item: TrendItem; onPreview?: () => void }) {
   const [imgError, setImgError] = useState(false);
   const cfg = CATEGORY_CONFIG[item.category];
   const showImg = item.thumbnail && !imgError;
   const isHot = (item.hotScore ?? 0) >= HOT_THRESHOLD;
 
   return (
-    <a
-      href={item.url || '#'}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group block relative w-full h-56 sm:h-64 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300"
+    <button
+      onClick={onPreview}
+      className="group block relative w-full h-56 sm:h-64 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 text-left"
     >
       {/* 背景画像 or グラデーション */}
       <div className={`absolute inset-0 bg-gradient-to-br ${cfg.gradient}`}>
@@ -71,6 +69,6 @@ export function FeaturedCard({ item }: { item: TrendItem }) {
           <p className="text-white/70 text-xs mt-1.5 line-clamp-1">{item.summary}</p>
         )}
       </div>
-    </a>
+    </button>
   );
 }

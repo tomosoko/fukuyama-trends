@@ -31,6 +31,7 @@ import { useScrolled } from '@/lib/useScrolled';
 import { useAutoRefresh } from '@/lib/useAutoRefresh';
 import { useKeyboard } from '@/lib/useKeyboard';
 import { getFavorites } from '@/lib/favorites';
+import { useInfiniteScroll } from '@/lib/useInfiniteScroll';
 
 const PAGE_SIZE = 12;
 
@@ -282,6 +283,7 @@ export default function Home() {
 
   const visible = filtered.slice(0, page * PAGE_SIZE);
   const hasMore = visible.length < filtered.length;
+  const sentinelRef = useInfiniteScroll(() => { if (hasMore) setPage(p => p + 1); }, hasMore);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors">
@@ -454,14 +456,15 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
-                {/* もっと見る */}
+                {/* 無限スクロール センチネル */}
                 {hasMore && (
-                  <button
-                    onClick={() => setPage(p => p + 1)}
-                    className="w-full py-3.5 rounded-xl border-2 border-dashed border-gray-200 dark:border-slate-700 text-sm font-medium text-gray-400 dark:text-slate-500 hover:border-blue-300 hover:text-blue-500 transition-colors"
-                  >
-                    もっと見る — あと {filtered.length - visible.length} 件
-                  </button>
+                  <div ref={sentinelRef} className="flex justify-center py-4">
+                    <div className="flex gap-1">
+                      {[0,1,2].map(i => (
+                        <div key={i} className="w-2 h-2 rounded-full bg-gray-300 dark:bg-slate-600 animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />
+                      ))}
+                    </div>
+                  </div>
                 )}
               </>
             )}

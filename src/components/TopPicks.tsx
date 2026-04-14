@@ -16,15 +16,20 @@ const CATEGORY_EMOJI: Record<TrendItem['category'], string> = {
   trends:  '🔥',
 };
 
-function PickCard({ item, rank }: { item: TrendItem; rank: number }) {
+function PickCard({ item, rank, onPreview }: { item: TrendItem; rank: number; onPreview?: () => void }) {
   const [imgError, setImgError] = useState(false);
   const showImg = item.thumbnail && !imgError;
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (onPreview) { e.preventDefault(); onPreview(); }
+  };
 
   return (
     <a
       href={item.url || '#'}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={handleClick}
       className="shrink-0 w-44 rounded-2xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white dark:bg-slate-800"
     >
       {/* 画像 or グラデーション */}
@@ -60,7 +65,7 @@ function PickCard({ item, rank }: { item: TrendItem; rank: number }) {
   );
 }
 
-export function TopPicks({ items }: { items: TrendItem[] }) {
+export function TopPicks({ items, onPreview }: { items: TrendItem[]; onPreview?: (item: TrendItem) => void }) {
   if (items.length === 0) return null;
   const picks = items.slice(0, 5);
 
@@ -72,7 +77,7 @@ export function TopPicks({ items }: { items: TrendItem[] }) {
       </div>
       <div className="scroll-x flex gap-3 -mx-4 px-4 pb-2">
         {picks.map((item, i) => (
-          <PickCard key={item.id} item={item} rank={i + 1} />
+          <PickCard key={item.id} item={item} rank={i + 1} onPreview={onPreview ? () => onPreview(item) : undefined} />
         ))}
       </div>
     </section>

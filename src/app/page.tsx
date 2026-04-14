@@ -303,7 +303,7 @@ export default function Home() {
       )}
       {/* ヘッダー */}
       <header className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-100 dark:border-slate-800 sticky top-0 z-20 transition-all duration-300 ${scrolled ? 'shadow-sm' : ''}`}>
-        <div className={`max-w-2xl mx-auto px-4 flex items-center gap-3 transition-all duration-300 ${scrolled ? 'h-11' : 'h-14'}`}>
+        <div className={`max-w-5xl mx-auto px-4 flex items-center gap-3 transition-all duration-300 ${scrolled ? 'h-11' : 'h-14'}`}>
           <div className="flex items-center gap-2.5 flex-1 min-w-0">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white text-sm font-bold shadow-sm shadow-blue-200">
               福
@@ -383,11 +383,11 @@ export default function Home() {
               return (
                 <>
                   {hero && <FeaturedCard item={hero} onPreview={() => setPreviewItem(hero)} />}
-                  {picks.length > 0 && <TopPicks items={picks} />}
+                  {picks.length > 0 && <TopPicks items={picks} onPreview={setPreviewItem} />}
                 </>
               );
             })()}
-            {!loadingItems && !showFavs && (category !== 'all' || search) && <TopPicks items={[...items].sort((a, b) => (b.hotScore ?? 0) - (a.hotScore ?? 0)).slice(0, 5)} />}
+            {!loadingItems && !showFavs && (category !== 'all' || search) && <TopPicks items={[...items].sort((a, b) => (b.hotScore ?? 0) - (a.hotScore ?? 0)).slice(0, 5)} onPreview={setPreviewItem} />}
             {!loadingItems && items.length > 0 && (
               <TrendingKeywords items={items} onSearch={kw => { setSearchRaw(kw); searchInputRef.current?.focus(); }} />
             )}

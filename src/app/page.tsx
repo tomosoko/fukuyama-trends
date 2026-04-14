@@ -41,6 +41,7 @@ import { ExportMenu } from '@/components/ExportMenu';
 import { CompactList } from '@/components/CompactList';
 import { NavDrawer } from '@/components/NavDrawer';
 import { DailyHighlights } from '@/components/DailyHighlights';
+import { OfflineBar } from '@/components/OfflineBar';
 
 const PAGE_SIZE = 12;
 
@@ -299,6 +300,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors">
+      <OfflineBar />
       {/* スキップナビ（アクセシビリティ） */}
       <a
         href="#main-content"

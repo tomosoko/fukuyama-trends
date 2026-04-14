@@ -23,6 +23,7 @@ import { TrendingKeywords } from '@/components/TrendingKeywords';
 import { ArticleModal } from '@/components/ArticleModal';
 import { SearchSuggestions } from '@/components/SearchSuggestions';
 import { WeatherWidget } from '@/components/WeatherWidget';
+import { DailyHeader } from '@/components/DailyHeader';
 import { useDebounce } from '@/lib/useDebounce';
 import { useDarkMode } from '@/lib/useDarkMode';
 import { useScrolled } from '@/lib/useScrolled';
@@ -339,6 +340,7 @@ export default function Home() {
           <TrendingKeywords items={items} onSearch={kw => { setSearchRaw(kw); searchInputRef.current?.focus(); }} />
         )}
         {!loadingItems && <StatsBar items={items} updatedAt={updatedAt} />}
+        <DailyHeader />
         <WeatherWidget />
 
         <div className="hidden sm:block">

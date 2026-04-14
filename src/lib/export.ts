@@ -11,11 +11,11 @@ export function exportAsText(items: TrendItem[]): void {
       `${i + 1}. ${item.title}`,
       `   カテゴリ: ${item.category === 'gourmet' ? 'グルメ' : item.category === 'events' ? 'イベント' : 'トレンド'}`,
       `   情報源: ${item.source}`,
-      item.publishedAt ? `   日時: ${new Date(item.publishedAt).toLocaleString('ja-JP')}` : '',
-      item.summary ? `   概要: ${item.summary}` : '',
-      item.url ? `   URL: ${item.url}` : '',
+      item.publishedAt ? `   日時: ${new Date(item.publishedAt).toLocaleString('ja-JP')}` : null,
+      item.summary ? `   概要: ${item.summary}` : null,
+      item.url ? `   URL: ${item.url}` : null,
       '',
-    ].filter(Boolean).join('\n')),
+    ].filter((s): s is string => s !== null).join('\n')),
   ];
 
   const text = lines.join('\n');

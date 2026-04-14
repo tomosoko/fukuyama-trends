@@ -226,6 +226,7 @@ export default function Home() {
   const { requestPermission, permission } = useNotifications(items);
   const [alerts, setAlerts] = useState<string[]>([]);
   useEffect(() => { setAlerts(getAlerts()); }, []);
+  const hasLoadedOnce = useRef(false);
 
   useEffect(() => {
     setFavIds(getFavorites());
@@ -238,7 +239,8 @@ export default function Home() {
     setError(false);
     setPage(1);
     if (force) setRefreshing(true);
-    setLoadingItems(true);
+    // 初回のみスケルトン表示。リフレッシュ時はローディングバーのみ
+    if (!hasLoadedOnce.current) setLoadingItems(true);
     setLoadingSummary(true);
     const qs = force ? '?bust=' + Date.now() : '';
 
@@ -250,12 +252,13 @@ export default function Home() {
         if (force) showToast(`${data.length}件の情報を取得しました`, 'success');
       })
       .catch(() => { setError(true); if (force) showToast('データ取得に失敗しました', 'error'); })
-      .finally(() => setLoadingItems(false));
+      .finally(() => { hasLoadedOnce.current = true; setLoadingItems(false); setRefreshing(false); });
 
     fetch('/api/summary' + qs)
       .then(r => r.json())
       .then((data: AISummary) => setSummary(data))
-      .finally(() => { setLoadingSummary(false); setRefreshing(false); });
+      .catch(() => { /* 要約エラーは無視 */ })
+      .finally(() => setLoadingSummary(false));
   }, []);
 
   useEffect(() => { load(); }, [load]);

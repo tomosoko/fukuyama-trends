@@ -39,7 +39,9 @@ ${itemsText}
   });
 
   try {
-    const text = message.content[0].type === 'text' ? message.content[0].text : '';
+    const raw = message.content[0].type === 'text' ? message.content[0].text : '';
+    // マークダウンコードブロックを除去してからパース
+    const text = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
     return JSON.parse(text) as AISummary;
   } catch {
     return {

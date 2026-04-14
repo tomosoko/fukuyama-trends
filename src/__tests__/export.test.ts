@@ -106,3 +106,29 @@ describe('exportAsCSV', () => {
     expect(() => exportAsCSV([])).not.toThrow();
   });
 });
+
+describe('exportAsText - blank lines between articles', () => {
+  it('記事間に空行が入る（filter(Boolean)でtrailing空行が消えない）', async () => {
+    const { exportAsText } = await import('@/lib/export');
+    exportAsText([
+      makeItem({ id: 'a', title: '記事A', url: 'https://a.com', publishedAt: '2026-04-15T10:00:00Z', summary: 'summary A' }),
+      makeItem({ id: 'b', title: '記事B', url: 'https://b.com', publishedAt: '2026-04-15T11:00:00Z', summary: 'summary B' }),
+    ]);
+    const text = await capturedBlob!.text();
+    // 2件の記事間に空行があることを確認
+    expect(text).toContain('記事A');
+    expect(text).toContain('記事B');
+    const articleAEnd = text.indexOf('https://a.com') + 'https://a.com'.length;
+    const articleBStart = text.indexOf('2. 記事B');
+    const between = text.slice(articleAEnd, articleBStart);
+    expect(between).toContain('\n\n'); // 空行が存在する
+  });
+
+  it('publishedAt がない記事でも null 行が含まれない', async () => {
+    const { exportAsText } = await import('@/lib/export');
+    exportAsText([makeItem({ publishedAt: undefined })]);
+    const text = await capturedBlob!.text();
+    expect(text).not.toContain('null');
+    expect(text).not.toContain('undefined');
+  });
+});

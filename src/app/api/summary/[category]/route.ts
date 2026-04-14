@@ -65,7 +65,8 @@ ${itemsText}
       }],
     });
 
-    const text = message.content[0].type === 'text' ? message.content[0].text : '';
+    const raw = message.content[0].type === 'text' ? message.content[0].text : '';
+    const text = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
     const summary = JSON.parse(text) as AISummary;
     setCached(cacheKey, summary, 20 * 60 * 1000);
     return NextResponse.json(summary);

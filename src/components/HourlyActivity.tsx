@@ -40,7 +40,7 @@ export function HourlyActivity({ items }: { items: TrendItem[] }) {
                   ? 'bg-blue-500'
                   : count > 0
                   ? 'bg-gray-300 dark:bg-slate-600 group-hover:bg-blue-300'
-                  : 'bg-gray-100 dark:bg-slate-750'
+                  : 'bg-gray-100 dark:bg-slate-700'
               }`}
               style={{ height: `${Math.max(2, (count / max) * 100)}%` }}
             />

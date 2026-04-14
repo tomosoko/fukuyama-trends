@@ -32,8 +32,8 @@ export function StatsBar({ items, updatedAt }: { items: TrendItem[]; updatedAt: 
 
   if (items.length === 0) return null;
 
-  const rssCount    = items.filter(i => i.source !== 'Google News').length;
-  const newsCount   = items.filter(i => i.source === 'Google News').length;
+  const rssCount    = items.filter(i => !i.id.startsWith('news-')).length;
+  const newsCount   = items.filter(i => i.id.startsWith('news-')).length;
   const sourceCount = new Set(items.map(i => i.source)).size;
   const hotCount    = items.filter(i => (i.hotScore ?? 0) >= HOT_THRESHOLD).length;
   const gourmetPct  = Math.round(items.filter(i => i.category === 'gourmet').length / items.length * 100);

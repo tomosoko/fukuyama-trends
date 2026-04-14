@@ -4,13 +4,12 @@ import { useEffect, useState } from 'react';
 
 export function OfflineBar() {
   const [isOffline, setIsOffline] = useState(false);
-  const [wasOffline, setWasOffline] = useState(false);
   const [showRestore, setShowRestore] = useState(false);
 
   useEffect(() => {
     setIsOffline(!navigator.onLine);
 
-    const handleOffline = () => { setIsOffline(true); setWasOffline(true); setShowRestore(false); };
+    const handleOffline = () => { setIsOffline(true); setShowRestore(false); };
     const handleOnline = () => { setIsOffline(false); setShowRestore(true); setTimeout(() => setShowRestore(false), 3000); };
 
     window.addEventListener('offline', handleOffline);

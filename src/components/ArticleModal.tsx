@@ -50,6 +50,7 @@ export function ArticleModal({ item, allItems = [], onClose, onNavigate }: Artic
     if (!item) return;
     setImgError(false);
     setScrollPct(0);
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
     setFav(getFavorites().has(item.id));
     setReadLater(getReadLater().has(item.id));
     markAsRead(item.id);

@@ -15,16 +15,19 @@ async function fetchOgImage(url: string): Promise<string | null> {
       || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
     if (ogMatch?.[1]) {
       const src = ogMatch[1];
-      // 相対URLを絶対URLに変換
+      // 相対URLを絶対URLに変換（ページURLを基準にする）
       if (src.startsWith('http')) return src;
-      const base = new URL(url);
-      return new URL(src, base.origin).href;
+      return new URL(src, url).href;
     }
 
     // twitter:image にフォールバック
     const twMatch = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i)
       || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i);
-    if (twMatch?.[1] && twMatch[1].startsWith('http')) return twMatch[1];
+    if (twMatch?.[1]) {
+      const src = twMatch[1];
+      if (src.startsWith('http')) return src;
+      return new URL(src, url).href;
+    }
 
     return null;
   } catch {

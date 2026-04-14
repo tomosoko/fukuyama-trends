@@ -11,7 +11,7 @@ function makeItem(overrides: Partial<TrendItem> = {}): TrendItem {
     category: 'trends',
     publishedAt: undefined,
     thumbnail: undefined,
-    summary: undefined,
+    summary: '',
     hotScore: 0,
     ...overrides,
   };

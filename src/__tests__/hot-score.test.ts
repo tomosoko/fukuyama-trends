@@ -115,4 +115,17 @@ describe('enrichWithScore', () => {
     const bonus = result[0].hotScore - calcHotScore(items[0]);
     expect(bonus).toBeLessThanOrEqual(16);
   });
+
+  it('タイトル内の重複単語はボーナスを過大計算しない', () => {
+    // "花火 花火" のように同じ単語が重複しても1単語分のボーナスのみ
+    const items = Array.from({ length: 4 }, (_, i) => makeItem({
+      id: `dup${i}`,
+      title: '花火 花火 大会', // "花火" が重複
+    }));
+    const result = enrichWithScore(items);
+    const bonus = result[0].hotScore - calcHotScore(items[0]);
+    // "花火"(4件) → 1ユニーク単語 → ボーナス+4, "大会"(4件) → +4, 計+8（重複で+8以上にはならない）
+    // 重複を考慮せず計算すると "花火"x2 + "大会"x1 = 3 → 12 になってしまう
+    expect(bonus).toBe(8);
+  });
 });

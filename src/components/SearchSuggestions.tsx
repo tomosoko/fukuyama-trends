@@ -1,7 +1,7 @@
 'use client';
 
 import { TrendItem } from '@/lib/types';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 
 // よく検索されそうなキーワードを記事タイトルから動的抽出
 function extractSuggestions(items: TrendItem[], query: string): string[] {
@@ -37,28 +37,36 @@ interface SearchSuggestionsProps {
 export function SearchSuggestions({ query, items, onSelect, visible }: SearchSuggestionsProps) {
   const suggestions = useMemo(() => extractSuggestions(items, query), [items, query]);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const activeIndexRef = useRef(activeIndex);
+  const suggestionsRef = useRef(suggestions);
+  const onSelectRef = useRef(onSelect);
+  useEffect(() => { activeIndexRef.current = activeIndex; }, [activeIndex]);
+  useEffect(() => { suggestionsRef.current = suggestions; }, [suggestions]);
+  useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
 
   // クエリが変わったらアクティブインデックスをリセット
   useEffect(() => { setActiveIndex(-1); }, [query]);
 
-  // キーボードナビゲーション
+  // キーボードナビゲーション — refを使いhandlerを毎render再生成しない
   useEffect(() => {
-    if (!visible || suggestions.length === 0) return;
+    if (!visible) return;
     const handler = (e: KeyboardEvent) => {
+      const sug = suggestionsRef.current;
+      if (sug.length === 0) return;
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setActiveIndex(i => (i + 1) % suggestions.length);
+        setActiveIndex(i => (i + 1) % sug.length);
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setActiveIndex(i => (i <= 0 ? suggestions.length - 1 : i - 1));
-      } else if (e.key === 'Enter' && activeIndex >= 0) {
+        setActiveIndex(i => (i <= 0 ? sug.length - 1 : i - 1));
+      } else if (e.key === 'Enter' && activeIndexRef.current >= 0) {
         e.preventDefault();
-        onSelect(suggestions[activeIndex]);
+        onSelectRef.current(sug[activeIndexRef.current]);
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [visible, suggestions, activeIndex, onSelect]);
+  }, [visible]);
 
   if (!visible || suggestions.length === 0) return null;
 

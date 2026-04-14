@@ -39,6 +39,21 @@ describe('markAsRead', () => {
     // 最後の article-200 は残っている
     expect(ids.has('article-200')).toBe(true);
   });
+
+  it('markAsReadはstorageイベントを発火する（同タブのlistenerに通知）', () => {
+    let fired = false;
+    window.addEventListener('storage', () => { fired = true; }, { once: true });
+    markAsRead('new-article');
+    expect(fired).toBe(true);
+  });
+
+  it('既読済みのIDに対しては二度目のstorageイベントを発火しない', () => {
+    markAsRead('article-x');
+    let count = 0;
+    window.addEventListener('storage', () => { count++; });
+    markAsRead('article-x'); // 2回目 — 既読済みなのでスキップ
+    expect(count).toBe(0);
+  });
 });
 
 describe('clearReadHistory', () => {

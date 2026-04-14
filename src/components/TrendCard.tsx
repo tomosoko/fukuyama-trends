@@ -219,6 +219,13 @@ export function TrendCard({ item, search = '', alerts = [], onPreview }: { item:
   useEffect(() => {
     setFav(getFavorites().has(item.id));
     setIsRead(getReadIds().has(item.id));
+    // モーダル等から favorites が変更されたときに同期
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'fukuyama-favorites') setFav(getFavorites().has(item.id));
+      if (e.key === 'fukuyama-read') setIsRead(getReadIds().has(item.id));
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, [item.id]);
   const handleFav = () => setFav(toggleFavorite(item.id));
   const handleRead = () => { markAsRead(item.id); setIsRead(true); };

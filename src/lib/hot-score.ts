@@ -44,8 +44,8 @@ function buildTrendBonus(items: TrendItem[]): Map<string, number> {
   // 各記事のトレンドボーナス = 含む単語のうち3回以上出現するものの数 × 4
   const bonus = new Map<string, number>();
   for (const item of items) {
-    const words = item.title.match(/[\u4e00-\u9faf\u3040-\u30ff\w]{2,}/g) ?? [];
-    const hot = words.filter(w => (wordCount.get(w) ?? 0) >= 3).length;
+    const words = new Set(item.title.match(/[\u4e00-\u9faf\u3040-\u30ff\w]{2,}/g) ?? []);
+    const hot = [...words].filter(w => (wordCount.get(w) ?? 0) >= 3).length;
     bonus.set(item.id, Math.min(hot * 4, 16)); // 最大 +16
   }
   return bonus;

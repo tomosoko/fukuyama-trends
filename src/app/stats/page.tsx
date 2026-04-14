@@ -41,11 +41,16 @@ export default function StatsPage() {
   useDarkMode();
   const [items, setItems] = useState<TrendItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
     fetch('/api/trends')
       .then(r => r.json())
-      .then((data: TrendItem[]) => setItems(data))
+      .then((data: TrendItem[]) => {
+        if (!Array.isArray(data)) throw new Error('invalid response');
+        setItems(data);
+      })
+      .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -109,6 +114,17 @@ export default function StatsPage() {
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="w-8 h-8 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin" />
+          </div>
+        ) : fetchError ? (
+          <div className="flex flex-col items-center py-20 text-center gap-3">
+            <p className="text-5xl">⚠️</p>
+            <p className="text-gray-500 dark:text-slate-400 font-medium">データの取得に失敗しました</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              再試行
+            </button>
           </div>
         ) : !stats ? (
           <p className="text-center text-gray-400 py-20">データなし</p>

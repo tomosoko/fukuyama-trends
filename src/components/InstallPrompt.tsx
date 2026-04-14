@@ -29,10 +29,9 @@ export function InstallPrompt() {
 
   const handleInstall = async () => {
     await deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setDeferredPrompt(null);
-    }
+    await deferredPrompt.userChoice;
+    // 結果に関わらずイベントは再利用不可なので必ずクリア
+    setDeferredPrompt(null);
   };
 
   const handleDismiss = () => {

@@ -71,19 +71,29 @@ export function ArticleModal({ item, allItems = [], onClose, onNavigate }: Artic
 
   const related = item ? findRelated(item, allItems) : [];
 
-  // キーボード操作（Esc: 閉じる、←→: 関連記事ナビ）
+  const onCloseRef = useRef(onClose);
+  const onNavigateRef = useRef(onNavigate);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+  useEffect(() => { onNavigateRef.current = onNavigate; }, [onNavigate]);
+
+  // キーボード操作（Esc: 閉じる、←→: 関連記事ナビ）— refを使いdepsを安定させる
+  const itemRef = useRef(item);
+  const allItemsRef = useRef(allItems);
+  useEffect(() => { itemRef.current = item; }, [item]);
+  useEffect(() => { allItemsRef.current = allItems; }, [allItems]);
+
   useEffect(() => {
     if (!item) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { onClose(); return; }
-      if (!onNavigate) return;
-      const related = findRelated(item, allItems);
-      if (e.key === 'ArrowRight' && related[0]) onNavigate(related[0]);
-      if (e.key === 'ArrowLeft'  && related[1]) onNavigate(related[1]);
+      if (e.key === 'Escape') { onCloseRef.current(); return; }
+      if (!onNavigateRef.current) return;
+      const rel = findRelated(itemRef.current!, allItemsRef.current);
+      if (e.key === 'ArrowRight' && rel[0]) onNavigateRef.current(rel[0]);
+      if (e.key === 'ArrowLeft'  && rel[1]) onNavigateRef.current(rel[1]);
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [item, allItems, onClose, onNavigate]);
+  }, [item]); // itemのopen/closeだけでlistener管理
 
   // 開いている間はスクロール無効
   useEffect(() => {

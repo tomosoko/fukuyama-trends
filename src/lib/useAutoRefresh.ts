@@ -11,12 +11,18 @@ export function useAutoRefresh(callback: () => void, intervalMs: number) {
   useEffect(() => { savedCallback.current = callback; }, [callback]);
 
   useEffect(() => {
-    const tick = () => savedCallback.current();
+    let lastRunAt = Date.now();
+    const tick = () => {
+      lastRunAt = Date.now();
+      savedCallback.current();
+    };
     const id = setInterval(tick, intervalMs);
 
-    // タブがアクティブに戻ったときに即時実行
+    // タブがアクティブに戻ったときに即時実行（直前のinterval実行から30s以上経過していれば）
     const onVisible = () => {
-      if (document.visibilityState === 'visible') tick();
+      if (document.visibilityState === 'visible' && Date.now() - lastRunAt > 30_000) {
+        tick();
+      }
     };
     document.addEventListener('visibilitychange', onVisible);
 

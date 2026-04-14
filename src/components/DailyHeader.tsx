@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 // 月ごとの福山おすすめ情報
 const MONTHLY_TIPS: Record<number, string> = {
@@ -29,16 +29,37 @@ const DAY_TIPS: Record<number, string> = {
   6: '土曜日 — 鞆の浦や福山城を散策しよう',
 };
 
-export function DailyHeader() {
-  const { dateStr, dayTip, monthTip } = useMemo(() => {
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('ja-JP', {
+function getDateInfo() {
+  const now = new Date();
+  return {
+    dateStr: now.toLocaleDateString('ja-JP', {
       year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
-    });
-    const dayTip = DAY_TIPS[now.getDay()];
-    const monthTip = MONTHLY_TIPS[now.getMonth() + 1];
-    return { dateStr, dayTip, monthTip };
+    }),
+    dayTip: DAY_TIPS[now.getDay()],
+    monthTip: MONTHLY_TIPS[now.getMonth() + 1],
+  };
+}
+
+export function DailyHeader() {
+  const [info, setInfo] = useState(getDateInfo);
+
+  // 真夜中に日付を更新する
+  useEffect(() => {
+    const scheduleUpdate = () => {
+      const now = new Date();
+      const msUntilMidnight =
+        new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() - now.getTime();
+      const id = setTimeout(() => {
+        setInfo(getDateInfo());
+        scheduleUpdate();
+      }, msUntilMidnight);
+      return id;
+    };
+    const id = scheduleUpdate();
+    return () => clearTimeout(id);
   }, []);
+
+  const { dateStr, dayTip, monthTip } = info;
 
   return (
     <div className="flex items-center gap-3 px-3 py-2.5 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-xl border border-indigo-100 dark:border-indigo-900/30">

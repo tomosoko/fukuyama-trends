@@ -20,6 +20,7 @@ export default function HistoryPage() {
   const [allItems, setAllItems] = useState<TrendItem[]>([]);
   const [ids, setIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [category, setCategory] = useState<Category>('all');
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [previewItem, setPreviewItem] = useState<TrendItem | null>(null);
@@ -30,6 +31,7 @@ export default function HistoryPage() {
     fetch('/api/trends')
       .then(r => r.json())
       .then((data: TrendItem[]) => setAllItems(data.filter(i => readIds.has(i.id))))
+      .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -90,6 +92,20 @@ export default function HistoryPage() {
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+          </div>
+        ) : fetchError ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="text-5xl mb-4">⚠️</div>
+            <p className="text-gray-500 dark:text-slate-400 font-medium mb-1">データの取得に失敗しました</p>
+            <p className="text-gray-400 dark:text-slate-500 text-sm mb-4">
+              閲覧履歴: {ids.size} 件
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-gray-700 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              再試行
+            </button>
           </div>
         ) : allItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">

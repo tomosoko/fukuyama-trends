@@ -39,6 +39,12 @@ function CompactItem({ item, search, onPreview }: CompactItemProps) {
   useEffect(() => {
     setFav(getFavorites().has(item.id));
     setIsRead(getReadIds().has(item.id));
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'fukuyama-favorites') setFav(getFavorites().has(item.id));
+      if (e.key === 'fukuyama-read') setIsRead(getReadIds().has(item.id));
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, [item.id]);
 
   const handleClick = () => {

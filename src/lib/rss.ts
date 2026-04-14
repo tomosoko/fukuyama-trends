@@ -10,15 +10,21 @@ const parser = new Parser({
 async function fetchSource(source: RssSource): Promise<TrendItem[]> {
   try {
     const feed = await parser.parseURL(source.url);
-    return (feed.items || []).slice(0, 5).map((item, i) => ({
-      id: `rss-${source.name}-${i}`,
-      title: item.title || '(タイトルなし)',
-      summary: item.contentSnippet || item.content || item.summary || '',
-      url: item.link,
-      source: source.name,
-      category: source.category,
-      publishedAt: item.pubDate || item.isoDate,
-    }));
+    return (feed.items || []).slice(0, 5).map((item) => {
+      // URLまたはタイトルのハッシュをIDに使う（インデックス不使用でフィード更新後も安定）
+      const idBase = item.link
+        ? item.link.replace(/[^a-zA-Z0-9]/g, '').slice(-20)
+        : (item.title || '').replace(/\s/g, '').slice(0, 20);
+      return {
+        id: `rss-${source.name.replace(/\s/g, '_')}-${idBase}`,
+        title: item.title || '(タイトルなし)',
+        summary: item.contentSnippet || item.content || item.summary || '',
+        url: item.link,
+        source: source.name,
+        category: source.category,
+        publishedAt: item.pubDate || item.isoDate,
+      };
+    });
   } catch {
     return [];
   }

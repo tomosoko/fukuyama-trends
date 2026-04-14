@@ -19,6 +19,20 @@ async function fetchFresh(): Promise<TrendItem[]> {
     ...(searchResult.status === 'fulfilled' ? searchResult.value : []),
   ];
 
+  // URLベースの重複除去（同一記事が複数ソースで取得されるケース）
+  const seenUrls = new Set<string>();
+  const seenIds = new Set<string>();
+  all = all.filter(item => {
+    if (item.url && seenUrls.has(item.url)) return false;
+    if (seenIds.has(item.id)) return false;
+    if (item.url) seenUrls.add(item.url);
+    seenIds.add(item.id);
+    return true;
+  });
+
+  // summaryのnull安全化
+  all = all.map(item => ({ ...item, summary: item.summary ?? '' }));
+
   // 日時降順ソート
   all.sort((a, b) => {
     if (!a.publishedAt) return 1;

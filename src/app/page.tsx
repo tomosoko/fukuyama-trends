@@ -287,7 +287,9 @@ export default function Home() {
       if (!filterByDate(item.publishedAt, dateRange)) return false;
       if (search) {
         const q = search.toLowerCase();
-        if (!item.title.toLowerCase().includes(q) && !item.summary.toLowerCase().includes(q)) return false;
+        const title = (item.title ?? '').toLowerCase();
+        const summary = (item.summary ?? '').toLowerCase();
+        if (!title.includes(q) && !summary.includes(q)) return false;
       }
       return true;
     });

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { TrendItem, Category } from '@/lib/types';
-import { getReadIds, markAsRead, clearReadHistory } from '@/lib/read-history';
+import { getReadIds, clearReadHistory } from '@/lib/read-history';
 import { TrendCard } from '@/components/TrendCard';
 import { useDarkMode } from '@/lib/useDarkMode';
 import { ArticleModal } from '@/components/ArticleModal';

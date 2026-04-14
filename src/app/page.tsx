@@ -38,6 +38,7 @@ import { AlertBar } from '@/components/AlertBar';
 import { getAlerts } from '@/lib/keyword-alerts';
 import { HourlyActivity } from '@/components/HourlyActivity';
 import { ExportMenu } from '@/components/ExportMenu';
+import { CompactList } from '@/components/CompactList';
 
 const PAGE_SIZE = 12;
 
@@ -215,7 +216,7 @@ export default function Home() {
   const [refreshing, setRefreshing] = useState(false);
   const [showFavs, setShowFavs] = useState(false);
   const [favIds, setFavIds] = useState<Set<string>>(new Set());
-  const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'timeline' | 'compact'>('grid');
   const [helpOpen, setHelpOpen] = useState(false);
   const [previewItem, setPreviewItem] = useState<TrendItem | null>(null);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -441,10 +442,19 @@ export default function Home() {
                   <button
                     onClick={() => setViewMode('grid')}
                     className={`px-2.5 py-1.5 text-xs transition-colors ${viewMode === 'grid' ? 'bg-gray-900 dark:bg-slate-100 text-white dark:text-slate-900' : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
-                    title="グリッド表示"
+                    title="カード表示"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('compact')}
+                    className={`px-2.5 py-1.5 text-xs border-l border-gray-200 dark:border-slate-700 transition-colors ${viewMode === 'compact' ? 'bg-gray-900 dark:bg-slate-100 text-white dark:text-slate-900' : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                    title="コンパクト表示"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 12h16M4 16h16" />
                     </svg>
                   </button>
                   <button
@@ -489,6 +499,19 @@ export default function Home() {
               <>
                 {viewMode === 'timeline' ? (
                   <TimelineView items={filtered} search={search} />
+                ) : viewMode === 'compact' ? (
+                  <>
+                    <CompactList items={visible} search={search} onPreview={setPreviewItem} />
+                    {hasMore && (
+                      <div ref={sentinelRef} className="flex justify-center py-4">
+                        <div className="flex gap-1">
+                          {[0,1,2].map(i => (
+                            <div key={i} className="w-2 h-2 rounded-full bg-gray-300 dark:bg-slate-600 animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <>
                     <div className="space-y-3">

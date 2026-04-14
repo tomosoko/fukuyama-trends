@@ -28,7 +28,7 @@ function groupByDate(items: TrendItem[]): { label: string; items: TrendItem[] }[
   return [...map.entries()].map(([label, items]) => ({ label, items }));
 }
 
-export function TimelineView({ items, search }: { items: TrendItem[]; search: string }) {
+export function TimelineView({ items, search, onPreview }: { items: TrendItem[]; search: string; onPreview?: (item: TrendItem) => void }) {
   const groups = groupByDate(items);
 
   return (
@@ -46,7 +46,12 @@ export function TimelineView({ items, search }: { items: TrendItem[]; search: st
           </div>
           <div className="ml-3.5 pl-4 border-l-2 border-gray-100 dark:border-slate-800 space-y-3">
             {group.items.map(item => (
-              <TrendCard key={item.id} item={item} search={search} />
+              <TrendCard
+                key={item.id}
+                item={item}
+                search={search}
+                onPreview={onPreview ? () => onPreview(item) : undefined}
+              />
             ))}
           </div>
         </section>

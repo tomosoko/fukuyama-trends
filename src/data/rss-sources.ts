@@ -20,6 +20,16 @@ export const RSS_SOURCES: RssSource[] = [
     url: 'https://r.gnavi.co.jp/hiroshima/fukuyama/rss/',
     category: 'gourmet',
   },
+  {
+    name: '中国新聞',
+    url: 'https://www.chugoku-np.co.jp/rss/feed/local.xml',
+    category: 'trends',
+  },
+  {
+    name: 'Jタウンネット広島',
+    url: 'https://j-town.net/hiroshima/rss/',
+    category: 'trends',
+  },
 ];
 
 // Google News RSS — 「福山市」必須で検索して広島全域の混入を防ぐ

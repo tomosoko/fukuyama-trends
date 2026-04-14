@@ -498,7 +498,7 @@ export default function Home() {
             ) : (
               <>
                 {viewMode === 'timeline' ? (
-                  <TimelineView items={filtered} search={search} />
+                  <TimelineView items={filtered} search={search} onPreview={setPreviewItem} />
                 ) : viewMode === 'compact' ? (
                   <>
                     <CompactList items={visible} search={search} onPreview={setPreviewItem} />

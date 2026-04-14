@@ -34,6 +34,9 @@ import { getFavorites } from '@/lib/favorites';
 import { useInfiniteScroll } from '@/lib/useInfiniteScroll';
 import { useNotifications } from '@/lib/useNotifications';
 import { TopSources } from '@/components/TopSources';
+import { AlertBar } from '@/components/AlertBar';
+import { getAlerts } from '@/lib/keyword-alerts';
+import { HourlyActivity } from '@/components/HourlyActivity';
 
 const PAGE_SIZE = 12;
 
@@ -216,6 +219,8 @@ export default function Home() {
   const [previewItem, setPreviewItem] = useState<TrendItem | null>(null);
   const [searchFocused, setSearchFocused] = useState(false);
   const { requestPermission, permission } = useNotifications(items);
+  const [alerts, setAlerts] = useState<string[]>([]);
+  useEffect(() => { setAlerts(getAlerts()); }, []);
 
   useEffect(() => {
     setFavIds(getFavorites());
@@ -383,6 +388,9 @@ export default function Home() {
         {!loadingItems && !showFavs && !search && category === 'all' && items.length > 0 && (
           <TopSources items={items} />
         )}
+        {!loadingItems && !showFavs && !search && category === 'all' && items.length > 0 && (
+          <HourlyActivity items={items} />
+        )}
         {!loadingItems && <StatsBar items={items} updatedAt={updatedAt} />}
         <DailyHeader />
         <WeatherWidget />
@@ -406,6 +414,8 @@ export default function Home() {
             visible={searchFocused && searchRaw.length > 0}
           />
         </div>
+
+        <AlertBar alerts={alerts} onAlertsChange={setAlerts} currentSearch={searchRaw || undefined} />
 
         {/* フィルター行 */}
         <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -468,7 +478,7 @@ export default function Home() {
                 <div className="space-y-3">
                   {visible.map((item, i) => (
                     <div key={item.id} className={`stagger-item animate-fade-in-up`} style={{ animationDelay: `${Math.min(i, 11) * 50}ms` }}>
-                      <TrendCard item={item} search={search} onPreview={() => setPreviewItem(item)} />
+                      <TrendCard item={item} search={search} alerts={alerts} onPreview={() => setPreviewItem(item)} />
                     </div>
                   ))}
                 </div>

@@ -6,6 +6,7 @@ import { TrendItem } from '@/lib/types';
 import { getFavorites, toggleFavorite } from '@/lib/favorites';
 import { getReadIds, markAsRead } from '@/lib/read-history';
 import { HOT_THRESHOLD } from '@/lib/hot-score';
+import { matchesAlert } from '@/lib/keyword-alerts';
 import { highlight } from './SearchBar';
 import { showToast } from './Toast';
 
@@ -45,7 +46,7 @@ async function shareItem(item: TrendItem) {
 }
 
 // 画像付きビッグカード
-function BigCard({ item, search, fav, isRead, onFav, onRead, onPreview }: CardProps) {
+function BigCard({ item, search, fav, isRead, alertMatch, onFav, onRead, onPreview }: CardProps) {
   const cfg = CATEGORY_CONFIG[item.category];
   const date = formatDate(item.publishedAt);
   const [imgError, setImgError] = useState(false);
@@ -53,7 +54,7 @@ function BigCard({ item, search, fav, isRead, onFav, onRead, onPreview }: CardPr
   const showNew = !isRead && isNew(item.publishedAt);
 
   return (
-    <article className={`group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-slate-700 hover:shadow-xl hover:shadow-gray-200/60 dark:hover:shadow-slate-900/40 transition-all duration-300 ${isRead ? 'opacity-70' : ''}`}>
+    <article className={`group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border transition-all duration-300 ${alertMatch ? 'border-amber-300 dark:border-amber-700 ring-1 ring-amber-200 dark:ring-amber-800' : 'border-gray-100 dark:border-slate-700'} hover:shadow-xl hover:shadow-gray-200/60 dark:hover:shadow-slate-900/40 ${isRead ? 'opacity-70' : ''}`}>
       {/* 画像エリア */}
       <a href={item.url || '#'} target="_blank" rel="noopener noreferrer" onClick={onRead}
         className={`block relative h-48 sm:h-56 overflow-hidden bg-gradient-to-br ${cfg.gradient} dark:bg-slate-700`}>
@@ -77,8 +78,12 @@ function BigCard({ item, search, fav, isRead, onFav, onRead, onPreview }: CardPr
         <span className={`absolute top-3 left-3 ${cfg.color} text-white text-xs font-bold px-2.5 py-1 rounded-full shadow`}>
           {cfg.label}
         </span>
-        {/* HOT/NEWバッジ */}
-        {(item.hotScore ?? 0) >= HOT_THRESHOLD ? (
+        {/* HOT/NEW/ALERTバッジ */}
+        {alertMatch ? (
+          <span className="absolute top-3 right-3 bg-amber-400 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
+            🔔 {alertMatch}
+          </span>
+        ) : (item.hotScore ?? 0) >= HOT_THRESHOLD ? (
           <span className="absolute top-3 right-3 bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow flex items-center gap-1">
             🔥 HOT
           </span>
@@ -137,22 +142,25 @@ function BigCard({ item, search, fav, isRead, onFav, onRead, onPreview }: CardPr
 }
 
 // 画像なしコンパクトカード
-function SmallCard({ item, search, fav, isRead, onFav, onRead, onPreview }: CardProps) {
+function SmallCard({ item, search, fav, isRead, alertMatch, onFav, onRead, onPreview }: CardProps) {
   const cfg = CATEGORY_CONFIG[item.category];
   const date = formatDate(item.publishedAt);
   const showNew = !isRead && isNew(item.publishedAt);
 
   return (
-    <article className={`group bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-3.5 flex gap-3 hover:border-gray-200 dark:hover:border-slate-600 hover:shadow-md hover:shadow-gray-100 dark:hover:shadow-slate-900/30 transition-all duration-200 ${isRead ? 'opacity-60' : ''}`}>
+    <article className={`group bg-white dark:bg-slate-800 rounded-xl border p-3.5 flex gap-3 hover:shadow-md transition-all duration-200 ${alertMatch ? 'border-amber-300 dark:border-amber-700 ring-1 ring-amber-200 dark:ring-amber-800' : 'border-gray-100 dark:border-slate-700 hover:border-gray-200 dark:hover:border-slate-600 hover:shadow-gray-100 dark:hover:shadow-slate-900/30'} ${isRead ? 'opacity-60' : ''}`}>
       {/* カテゴリライン */}
       <div className={`w-1 rounded-full shrink-0 ${cfg.color}`} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.light}`}>{cfg.label}</span>
-          {(item.hotScore ?? 0) >= HOT_THRESHOLD && (
+          {alertMatch && (
+            <span className="text-xs font-bold text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded-full">🔔</span>
+          )}
+          {!alertMatch && (item.hotScore ?? 0) >= HOT_THRESHOLD && (
             <span className="text-xs font-bold text-rose-500">🔥</span>
           )}
-          {showNew && (
+          {!alertMatch && showNew && (
             <span className="text-xs font-bold text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded-full">NEW</span>
           )}
           <span className="text-xs text-gray-400 dark:text-slate-500 truncate">{item.source}</span>
@@ -199,12 +207,13 @@ interface CardProps {
   search: string;
   fav: boolean;
   isRead: boolean;
+  alertMatch: string | null;
   onFav: () => void;
   onRead: () => void;
   onPreview?: () => void;
 }
 
-export function TrendCard({ item, search = '', onPreview }: { item: TrendItem; search?: string; onPreview?: () => void }) {
+export function TrendCard({ item, search = '', alerts = [], onPreview }: { item: TrendItem; search?: string; alerts?: string[]; onPreview?: () => void }) {
   const [fav, setFav] = useState(false);
   const [isRead, setIsRead] = useState(false);
   useEffect(() => {
@@ -213,8 +222,9 @@ export function TrendCard({ item, search = '', onPreview }: { item: TrendItem; s
   }, [item.id]);
   const handleFav = () => setFav(toggleFavorite(item.id));
   const handleRead = () => { markAsRead(item.id); setIsRead(true); };
+  const alertMatch = matchesAlert(item.title + ' ' + item.summary, alerts);
 
-  const props: CardProps = { item, search, fav, isRead, onFav: handleFav, onRead: handleRead, onPreview };
+  const props: CardProps = { item, search, fav, isRead, alertMatch, onFav: handleFav, onRead: handleRead, onPreview };
   return item.thumbnail
     ? <BigCard {...props} />
     : <SmallCard {...props} />;

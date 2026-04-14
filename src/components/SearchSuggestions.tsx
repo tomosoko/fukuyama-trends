@@ -1,7 +1,7 @@
 'use client';
 
 import { TrendItem } from '@/lib/types';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 // よく検索されそうなキーワードを記事タイトルから動的抽出
 function extractSuggestions(items: TrendItem[], query: string): string[] {
@@ -36,16 +36,44 @@ interface SearchSuggestionsProps {
 
 export function SearchSuggestions({ query, items, onSelect, visible }: SearchSuggestionsProps) {
   const suggestions = useMemo(() => extractSuggestions(items, query), [items, query]);
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  // クエリが変わったらアクティブインデックスをリセット
+  useEffect(() => { setActiveIndex(-1); }, [query]);
+
+  // キーボードナビゲーション
+  useEffect(() => {
+    if (!visible || suggestions.length === 0) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveIndex(i => (i + 1) % suggestions.length);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveIndex(i => (i <= 0 ? suggestions.length - 1 : i - 1));
+      } else if (e.key === 'Enter' && activeIndex >= 0) {
+        e.preventDefault();
+        onSelect(suggestions[activeIndex]);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [visible, suggestions, activeIndex, onSelect]);
 
   if (!visible || suggestions.length === 0) return null;
 
   return (
     <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-lg z-30 overflow-hidden">
-      {suggestions.map(s => (
+      {suggestions.map((s, i) => (
         <button
           key={s}
           onMouseDown={e => { e.preventDefault(); onSelect(s); }}
-          className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-3 transition-colors"
+          onMouseEnter={() => setActiveIndex(i)}
+          className={`w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-slate-300 flex items-center gap-3 transition-colors ${
+            i === activeIndex
+              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+              : 'hover:bg-gray-50 dark:hover:bg-slate-700'
+          }`}
         >
           <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}

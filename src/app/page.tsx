@@ -230,7 +230,9 @@ export default function Home() {
 
   useEffect(() => {
     setFavIds(getFavorites());
-    const handler = () => setFavIds(getFavorites());
+    const handler = (e: StorageEvent) => {
+      if (e.key === 'fukuyama-favorites') setFavIds(getFavorites());
+    };
     window.addEventListener('storage', handler);
     return () => window.removeEventListener('storage', handler);
   }, []);

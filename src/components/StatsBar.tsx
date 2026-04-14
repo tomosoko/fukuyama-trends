@@ -20,8 +20,13 @@ export function StatsBar({ items, updatedAt }: { items: TrendItem[]; updatedAt: 
   const [, setTick] = useState(0);
 
   useEffect(() => {
-    const ids = getReadIds();
-    setReadCount(items.filter(i => ids.has(i.id)).length);
+    const update = () => {
+      const ids = getReadIds();
+      setReadCount(items.filter(i => ids.has(i.id)).length);
+    };
+    update();
+    window.addEventListener('storage', update);
+    return () => window.removeEventListener('storage', update);
   }, [items]);
 
   useEffect(() => {

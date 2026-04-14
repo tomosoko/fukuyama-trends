@@ -45,7 +45,7 @@ async function shareItem(item: TrendItem) {
 }
 
 // 画像付きビッグカード
-function BigCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
+function BigCard({ item, search, fav, isRead, onFav, onRead, onPreview }: CardProps) {
   const cfg = CATEGORY_CONFIG[item.category];
   const date = formatDate(item.publishedAt);
   const [imgError, setImgError] = useState(false);
@@ -98,9 +98,9 @@ function BigCard({ item, search, fav, isRead, onFav, onRead }: CardProps) {
           {date && <span className="ml-auto shrink-0">{date}</span>}
         </div>
         <h3 className="font-bold text-gray-900 dark:text-slate-100 text-base leading-snug mb-2 line-clamp-2">
-          <a href={item.url || '#'} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">
+          <button onClick={onPreview ?? onRead} className="text-left hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-full">
             {highlight(item.title, search)}
-          </a>
+          </button>
         </h3>
         {item.summary && (
           <p className="text-sm text-gray-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-3">

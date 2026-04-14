@@ -21,6 +21,7 @@ import { FeaturedCard } from '@/components/FeaturedCard';
 import { InstallPrompt } from '@/components/InstallPrompt';
 import { TrendingKeywords } from '@/components/TrendingKeywords';
 import { ArticleModal } from '@/components/ArticleModal';
+import { SearchSuggestions } from '@/components/SearchSuggestions';
 import { useDebounce } from '@/lib/useDebounce';
 import { useDarkMode } from '@/lib/useDarkMode';
 import { useScrolled } from '@/lib/useScrolled';
@@ -185,6 +186,7 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
   const [helpOpen, setHelpOpen] = useState(false);
   const [previewItem, setPreviewItem] = useState<TrendItem | null>(null);
+  const [searchFocused, setSearchFocused] = useState(false);
 
   useEffect(() => {
     setFavIds(getFavorites());
@@ -341,7 +343,21 @@ export default function Home() {
           <CategoryTabs active={category} onChange={setCategory} counts={counts} />
         </div>
 
-        <SearchBar ref={searchInputRef} value={searchRaw} onChange={setSearchRaw} />
+        <div className="relative">
+          <SearchBar
+            ref={searchInputRef}
+            value={searchRaw}
+            onChange={setSearchRaw}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
+          />
+          <SearchSuggestions
+            query={searchRaw}
+            items={items}
+            onSelect={kw => { setSearchRaw(kw); setSearchFocused(false); }}
+            visible={searchFocused && searchRaw.length > 0}
+          />
+        </div>
 
         {/* フィルター行 */}
         <div className="flex items-center justify-between gap-2 flex-wrap">

@@ -5,7 +5,9 @@ import { forwardRef } from 'react';
 export const SearchBar = forwardRef<HTMLInputElement, {
   value: string;
   onChange: (v: string) => void;
-}>(function SearchBar({ value, onChange }, ref) {
+  onFocus?: () => void;
+  onBlur?: () => void;
+}>(function SearchBar({ value, onChange, onFocus, onBlur }, ref) {
   return (
     <div className="relative">
       <svg
@@ -20,6 +22,8 @@ export const SearchBar = forwardRef<HTMLInputElement, {
         type="search"
         value={value}
         onChange={e => onChange(e.target.value)}
+        onFocus={onFocus}
+        onBlur={onBlur}
         placeholder="キーワードで絞り込む... (/ でフォーカス)"
         aria-label="記事を検索"
         className="w-full pl-9 pr-10 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800

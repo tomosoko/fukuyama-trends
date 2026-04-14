@@ -10,6 +10,16 @@ export const RSS_SOURCES: RssSource[] = [
     url: 'https://www.city.fukuyama.hiroshima.jp/rss/siteinfo.rdf',
     category: 'events',
   },
+  {
+    name: '広島県観光',
+    url: 'https://www.hiroshima-kankou.com/rss.xml',
+    category: 'events',
+  },
+  {
+    name: 'ぐるなび福山',
+    url: 'https://r.gnavi.co.jp/hiroshima/fukuyama/rss/',
+    category: 'gourmet',
+  },
 ];
 
 // Google News RSS — 「福山市」必須で検索して広島全域の混入を防ぐ
@@ -34,4 +44,10 @@ export const SEARCH_KEYWORDS: { query: string; category: 'gourmet' | 'events' | 
   { query: '福山 SNS 人気 スポット',          category: 'trends' },
   { query: '福山市 観光 おすすめ 2026',        category: 'trends' },
   { query: '福山市 開発 再開発',              category: 'trends' },
+  // 追加キーワード
+  { query: '福山市 子育て 公園',              category: 'events'  },
+  { query: '福山市 移住 定住',               category: 'trends'  },
+  { query: '福山駅 周辺 ショッピング',         category: 'gourmet' },
+  { query: '福山 和食 懐石 人気',             category: 'gourmet' },
+  { query: '福山 週末 おでかけ',              category: 'events'  },
 ];

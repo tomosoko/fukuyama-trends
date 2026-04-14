@@ -1,8 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 
-const geist = Geist({ subsets: ["latin"] });
+const geist = Geist({ subsets: ["latin"], variable: '--font-geist' });
+const notoSansJP = Noto_Sans_JP({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-noto',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: "福山トレンド",
@@ -47,7 +53,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" className={`${geist.className} h-full antialiased`}>
+    <html lang="ja" className={`${geist.variable} ${notoSansJP.variable} h-full antialiased`}>
       <head>
         <script
           type="application/ld+json"

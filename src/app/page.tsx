@@ -130,14 +130,36 @@ function DarkModeButton({ theme, toggle }: { theme: string; toggle: () => void }
   );
 }
 
-function EmptyState({ search, onClear }: { search: string; onClear: () => void }) {
+const SUGGESTION_KEYWORDS = ['ランチ', 'カフェ', 'イベント', '福山城', '鞆の浦', 'ばら祭'];
+
+function EmptyState({ search, onClear, onSearch }: { search: string; onClear: () => void; onSearch?: (kw: string) => void }) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
+    <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="text-5xl mb-4">🔍</div>
       <p className="text-gray-500 dark:text-slate-400 font-medium mb-1">
         {search ? `「${search}」に一致する情報が見つかりませんでした` : '情報が見つかりませんでした'}
       </p>
-      {search && <button onClick={onClear} className="mt-3 text-sm text-blue-500 hover:underline">検索をクリア</button>}
+      {search && (
+        <button onClick={onClear} className="mt-3 text-sm text-blue-500 hover:underline">
+          検索をクリア
+        </button>
+      )}
+      {onSearch && (
+        <div className="mt-5">
+          <p className="text-xs text-gray-400 dark:text-slate-500 mb-2">こちらはいかが？</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {SUGGESTION_KEYWORDS.map(kw => (
+              <button
+                key={kw}
+                onClick={() => { onClear(); onSearch(kw); }}
+                className="px-3 py-1.5 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 text-xs rounded-full hover:bg-blue-100 hover:text-blue-600 transition-colors"
+              >
+                {kw}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -418,7 +440,7 @@ export default function Home() {
         ) : loadingItems ? (
           <SkeletonList count={6} />
         ) : filtered.length === 0 ? (
-          <EmptyState search={searchRaw} onClear={() => setSearchRaw('')} />
+          <EmptyState search={searchRaw} onClear={() => setSearchRaw('')} onSearch={kw => setSearchRaw(kw)} />
         ) : (
           <>
             {viewMode === 'timeline' ? (

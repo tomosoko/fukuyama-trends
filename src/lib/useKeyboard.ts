@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, RefObject } from 'react';
+import { useEffect, useRef, RefObject } from 'react';
 
 interface Options {
   searchRef: RefObject<HTMLInputElement | null>;
@@ -10,6 +10,14 @@ interface Options {
 }
 
 export function useKeyboard({ searchRef, onRefresh, onToggleDark, onHelp }: Options) {
+  // callbackをrefで保持し、ハンドラを再登録せずに最新値を呼ぶ
+  const onRefreshRef = useRef(onRefresh);
+  const onToggleDarkRef = useRef(onToggleDark);
+  const onHelpRef = useRef(onHelp);
+  useEffect(() => { onRefreshRef.current = onRefresh; }, [onRefresh]);
+  useEffect(() => { onToggleDarkRef.current = onToggleDark; }, [onToggleDark]);
+  useEffect(() => { onHelpRef.current = onHelp; }, [onHelp]);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement).tagName;
@@ -30,25 +38,25 @@ export function useKeyboard({ searchRef, onRefresh, onToggleDark, onHelp }: Opti
 
       // r → 更新
       if (e.key === 'r' && !isEditing && !e.metaKey && !e.ctrlKey) {
-        onRefresh();
+        onRefreshRef.current();
         return;
       }
 
       // d → ダークモード切替
       if (e.key === 'd' && !isEditing && !e.metaKey && !e.ctrlKey) {
-        onToggleDark();
+        onToggleDarkRef.current();
         return;
       }
 
       // ? → ヘルプ
       if (e.key === '?' && !isEditing) {
         e.preventDefault();
-        onHelp?.();
+        onHelpRef.current?.();
         return;
       }
     };
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [searchRef, onRefresh, onToggleDark, onHelp]);
+  }, [searchRef]); // searchRefのみ依存（stable ref）
 }

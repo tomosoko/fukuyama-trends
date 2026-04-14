@@ -47,4 +47,11 @@ describe('toggleFavorite', () => {
     expect(getFavorites().has('id1')).toBe(false);
     expect(getFavorites().has('id2')).toBe(true);
   });
+
+  it('toggleFavoriteはstorageイベントを発火する（同タブのlistenerに通知）', () => {
+    let eventFired = false;
+    window.addEventListener('storage', () => { eventFired = true; }, { once: true });
+    toggleFavorite('id1');
+    expect(eventFired).toBe(true);
+  });
 });

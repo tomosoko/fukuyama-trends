@@ -20,5 +20,7 @@ export function toggleFavorite(id: string): boolean {
     favs.add(id);
   }
   localStorage.setItem(KEY, JSON.stringify([...favs]));
+  // 同タブのlistenerにも通知（storageイベントは通常クロスタブのみ発火）
+  window.dispatchEvent(new StorageEvent('storage', { key: KEY }));
   return favs.has(id);
 }

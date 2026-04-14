@@ -6,8 +6,9 @@ export function findRelated(item: TrendItem, all: TrendItem[], limit = 3): Trend
   return all
     .filter(i => i.id !== item.id)
     .map(i => {
-      const w = i.title.match(/[\u4e00-\u9faf\u3040-\u30ff]{2,}/g) ?? [];
-      const shared = w.filter(x => words.has(x)).length;
+      // ユニークワードのみカウント（タイトル内の繰り返しでスコアが膨らまないよう）
+      const w = new Set(i.title.match(/[\u4e00-\u9faf\u3040-\u30ff]{2,}/g) ?? []);
+      const shared = [...w].filter(x => words.has(x)).length;
       return { item: i, score: shared };
     })
     .filter(({ score }) => score >= 1)

@@ -37,6 +37,7 @@ import { TopSources } from '@/components/TopSources';
 import { AlertBar } from '@/components/AlertBar';
 import { getAlerts } from '@/lib/keyword-alerts';
 import { HourlyActivity } from '@/components/HourlyActivity';
+import { ExportMenu } from '@/components/ExportMenu';
 
 const PAGE_SIZE = 12;
 
@@ -295,6 +296,13 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors">
+      {/* スキップナビ（アクセシビリティ） */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium"
+      >
+        メインコンテンツへスキップ
+      </a>
       {/* ローディングバー */}
       {(loadingItems || refreshing) && (
         <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-blue-100 dark:bg-slate-800 overflow-hidden">
@@ -367,7 +375,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-5 pb-24 sm:pb-8">
+      <main id="main-content" className="max-w-5xl mx-auto px-4 py-5 pb-24 sm:pb-8">
         {/* デスクトップ: 2カラム, モバイル: 1カラム */}
         <div className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-6 lg:items-start">
 
@@ -450,6 +458,7 @@ export default function Home() {
                   </button>
                 </div>
                 <SortSelect value={sortOrder} onChange={setSortOrder} />
+                <ExportMenu items={filtered} />
               </div>
             </div>
 

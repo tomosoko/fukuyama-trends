@@ -22,12 +22,30 @@ function formatDate(dateStr?: string) {
   } catch { return null; }
 }
 
-interface ArticleModalProps {
-  item: TrendItem | null;
-  onClose: () => void;
+/** タイトルのキーワード共通度でスコアリング */
+function findRelated(item: TrendItem, all: TrendItem[]): TrendItem[] {
+  const words = new Set(item.title.match(/[\u4e00-\u9faf\u3040-\u30ff]{2,}/g) ?? []);
+  return all
+    .filter(i => i.id !== item.id)
+    .map(i => {
+      const w = i.title.match(/[\u4e00-\u9faf\u3040-\u30ff]{2,}/g) ?? [];
+      const shared = w.filter(x => words.has(x)).length;
+      return { item: i, score: shared };
+    })
+    .filter(({ score }) => score >= 1)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+    .map(({ item }) => item);
 }
 
-export function ArticleModal({ item, onClose }: ArticleModalProps) {
+interface ArticleModalProps {
+  item: TrendItem | null;
+  allItems?: TrendItem[];
+  onClose: () => void;
+  onNavigate?: (item: TrendItem) => void;
+}
+
+export function ArticleModal({ item, allItems = [], onClose, onNavigate }: ArticleModalProps) {
   const [fav, setFav] = useState(false);
   const [imgError, setImgError] = useState(false);
 
@@ -37,6 +55,8 @@ export function ArticleModal({ item, onClose }: ArticleModalProps) {
     setFav(getFavorites().has(item.id));
     markAsRead(item.id);
   }, [item]);
+
+  const related = item ? findRelated(item, allItems) : [];
 
   // キーボードで閉じる
   useEffect(() => {
@@ -144,6 +164,32 @@ export function ArticleModal({ item, onClose }: ArticleModalProps) {
             <p className="text-sm text-gray-600 dark:text-slate-300 leading-relaxed mb-4">
               {item.summary}
             </p>
+          )}
+
+          {/* 関連記事 */}
+          {related.length > 0 && (
+            <div className="border-t border-gray-100 dark:border-slate-700 pt-4">
+              <p className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-3">
+                関連記事
+              </p>
+              <div className="space-y-2">
+                {related.map(rel => (
+                  <button
+                    key={rel.id}
+                    onClick={() => onNavigate?.(rel)}
+                    className="w-full text-left flex items-start gap-3 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors group"
+                  >
+                    <div className={`w-1.5 rounded-full self-stretch shrink-0 bg-${rel.category === 'gourmet' ? 'orange' : rel.category === 'events' ? 'blue' : 'violet'}-400`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-700 dark:text-slate-300 line-clamp-2 leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {rel.title}
+                      </p>
+                      <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{rel.source}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
         </div>
 

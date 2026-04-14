@@ -481,7 +481,12 @@ export default function Home() {
       <KeyboardHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
       <ScrollToTop />
       <InstallPrompt />
-      <ArticleModal item={previewItem} onClose={() => setPreviewItem(null)} />
+      <ArticleModal
+        item={previewItem}
+        allItems={items}
+        onClose={() => setPreviewItem(null)}
+        onNavigate={item => setPreviewItem(item)}
+      />
     </div>
   );
 }

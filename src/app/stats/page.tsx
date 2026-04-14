@@ -190,7 +190,7 @@ export default function StatsPage() {
               <p className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-3">HOTスコア分布</p>
               <div className="space-y-2">
                 {stats.scoreRanges.map(({ label, count }) => (
-                  <MiniBar key={label} label={label} value={count} max={Math.max(...stats.scoreRanges.map(r => r.count))} color="bg-rose-400" />
+                  <MiniBar key={label} label={label} value={count} max={Math.max(...stats.scoreRanges.map(r => r.count), 1)} color="bg-rose-400" />
                 ))}
               </div>
             </div>

@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { TrendItem } from '@/lib/types';
+import { HOT_THRESHOLD } from '@/lib/hot-score';
 
 interface SourceStat {
   name: string;
@@ -9,8 +10,6 @@ interface SourceStat {
   hotCount: number;
   category: string;
 }
-
-const HOT_THRESHOLD = 30;
 
 const SOURCE_COLORS: Record<string, string> = {
   gourmet: 'bg-orange-400',

@@ -6,6 +6,7 @@ import { TrendItem } from '@/lib/types';
 import { HOT_THRESHOLD } from '@/lib/hot-score';
 import { getFavorites, toggleFavorite } from '@/lib/favorites';
 import { markAsRead } from '@/lib/read-history';
+import { getReadLater, toggleReadLater } from '@/lib/read-later';
 import { showToast } from './Toast';
 
 const CATEGORY_CONFIG = {
@@ -52,6 +53,7 @@ function readingTimeMin(text: string): number {
 
 export function ArticleModal({ item, allItems = [], onClose, onNavigate }: ArticleModalProps) {
   const [fav, setFav] = useState(false);
+  const [readLater, setReadLater] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [scrollPct, setScrollPct] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -63,6 +65,7 @@ export function ArticleModal({ item, allItems = [], onClose, onNavigate }: Artic
     setImgError(false);
     setScrollPct(0);
     setFav(getFavorites().has(item.id));
+    setReadLater(getReadLater().has(item.id));
     markAsRead(item.id);
   }, [item]);
 
@@ -111,6 +114,11 @@ export function ArticleModal({ item, allItems = [], onClose, onNavigate }: Artic
   const readMin = readingTimeMin((item.summary ?? '') + item.title);
 
   const handleFav = () => setFav(toggleFavorite(item.id));
+  const handleReadLater = () => {
+    const next = toggleReadLater(item.id);
+    setReadLater(next);
+    if (next) showToast('あとで読むに追加しました', 'success');
+  };
   const handleShare = async () => {
     try {
       if (navigator.share) {
@@ -259,6 +267,20 @@ export function ArticleModal({ item, allItems = [], onClose, onNavigate }: Artic
                 d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
             {fav ? 'お気に入り済み' : 'お気に入り'}
+          </button>
+          <button
+            onClick={handleReadLater}
+            className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+              readLater
+                ? 'bg-sky-50 dark:bg-sky-900/20 text-sky-500'
+                : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400 hover:text-sky-500'
+            }`}
+            title="あとで読む"
+          >
+            <svg className="w-4 h-4" fill={readLater ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+            <span className="hidden sm:inline">{readLater ? '保存済み' : 'あとで'}</span>
           </button>
           <button
             onClick={handleShare}

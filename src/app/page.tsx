@@ -24,6 +24,7 @@ import { ArticleModal } from '@/components/ArticleModal';
 import { SearchSuggestions } from '@/components/SearchSuggestions';
 import { WeatherWidget } from '@/components/WeatherWidget';
 import { DailyHeader } from '@/components/DailyHeader';
+import { CategoryRanking } from '@/components/CategoryRanking';
 import { useDebounce } from '@/lib/useDebounce';
 import { useDarkMode } from '@/lib/useDarkMode';
 import { useScrolled } from '@/lib/useScrolled';
@@ -338,6 +339,9 @@ export default function Home() {
         {!loadingItems && !showFavs && (category !== 'all' || search) && <TopPicks items={[...items].sort((a, b) => (b.hotScore ?? 0) - (a.hotScore ?? 0)).slice(0, 5)} />}
         {!loadingItems && items.length > 0 && (
           <TrendingKeywords items={items} onSearch={kw => { setSearchRaw(kw); searchInputRef.current?.focus(); }} />
+        )}
+        {!loadingItems && !showFavs && !search && category === 'all' && items.length > 0 && (
+          <CategoryRanking items={items} onPreview={setPreviewItem} />
         )}
         {!loadingItems && <StatsBar items={items} updatedAt={updatedAt} />}
         <DailyHeader />

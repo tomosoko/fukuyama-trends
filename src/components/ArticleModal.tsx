@@ -7,6 +7,7 @@ import { HOT_THRESHOLD } from '@/lib/hot-score';
 import { getFavorites, toggleFavorite } from '@/lib/favorites';
 import { markAsRead } from '@/lib/read-history';
 import { getReadLater, toggleReadLater } from '@/lib/read-later';
+import { findRelated } from '@/lib/related';
 import { showToast } from './Toast';
 
 const CATEGORY_CONFIG = {
@@ -23,21 +24,6 @@ function formatDate(dateStr?: string) {
   } catch { return null; }
 }
 
-/** タイトルのキーワード共通度でスコアリング */
-function findRelated(item: TrendItem, all: TrendItem[]): TrendItem[] {
-  const words = new Set(item.title.match(/[\u4e00-\u9faf\u3040-\u30ff]{2,}/g) ?? []);
-  return all
-    .filter(i => i.id !== item.id)
-    .map(i => {
-      const w = i.title.match(/[\u4e00-\u9faf\u3040-\u30ff]{2,}/g) ?? [];
-      const shared = w.filter(x => words.has(x)).length;
-      return { item: i, score: shared };
-    })
-    .filter(({ score }) => score >= 1)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 3)
-    .map(({ item }) => item);
-}
 
 interface ArticleModalProps {
   item: TrendItem | null;

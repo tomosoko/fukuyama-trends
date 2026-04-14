@@ -5,7 +5,6 @@ import { generateSummary } from '@/lib/claude';
 import { getCached, setCached } from '@/lib/cache';
 import { TrendItem, AISummary } from '@/lib/types';
 
-const TRENDS_TTL = 10 * 60 * 1000;
 const SUMMARY_TTL = 30 * 60 * 1000; // 要約は30分キャッシュ
 
 export async function GET() {
@@ -14,6 +13,8 @@ export async function GET() {
     return NextResponse.json(cachedSummary, { headers: { 'X-Cache': 'HIT' } });
   }
 
+  // trendsキャッシュを読み取り専用で使う（summaryルートは'trends'キャッシュに書き込まない）
+  // ← 書き込むと OG画像・hotScore未付与の生データで上書きされてしまう
   let items = getCached<TrendItem[]>('trends');
   if (!items) {
     const [rssItems, searchItems] = await Promise.allSettled([
@@ -24,7 +25,8 @@ export async function GET() {
       ...(rssItems.status === 'fulfilled' ? rssItems.value : []),
       ...(searchItems.status === 'fulfilled' ? searchItems.value : []),
     ];
-    setCached('trends', items, TRENDS_TTL);
+    // 注意: ここでは 'trends' キャッシュに書かない。richデータは /api/trends が管理する。
+    // summaryはsummaryキャッシュのみ管理する
   }
 
   try {

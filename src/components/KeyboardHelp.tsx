@@ -3,11 +3,13 @@
 import { useEffect } from 'react';
 
 const SHORTCUTS = [
-  { key: '/',   desc: '検索フォームにフォーカス' },
-  { key: 'Esc', desc: '検索クリア・フォーカス解除' },
-  { key: 'r',   desc: 'データを手動更新' },
-  { key: 'd',   desc: 'ダークモード切替' },
-  { key: '?',   desc: 'このヘルプを表示' },
+  { key: '/',         desc: '検索フォームにフォーカス' },
+  { key: 'Esc',       desc: '検索クリア・モーダル閉じる' },
+  { key: 'r',         desc: 'データを手動更新' },
+  { key: 'd',         desc: 'ダークモード切替' },
+  { key: '?',         desc: 'このヘルプを表示' },
+  { key: '← →',      desc: 'モーダル内: 関連記事を切替' },
+  { key: '↓ swipe',  desc: 'モーダルを閉じる（スワイプ）' },
 ];
 
 export function KeyboardHelp({ open, onClose }: { open: boolean; onClose: () => void }) {

@@ -247,7 +247,7 @@ export default function Home() {
 
   const load = useCallback((force = false) => {
     setError(false);
-    setPage(1);
+    if (force) setPage(1); // 手動更新のみページリセット（自動更新でスクロール位置を失わない）
     if (force) setRefreshing(true);
     // 初回のみスケルトン表示。リフレッシュ時はローディングバーのみ
     if (!hasLoadedOnce.current) setLoadingItems(true);

@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { TrendItem } from '@/lib/types';
 
-// page.tsx の sortItems ロジックを独立してテスト
+// page.tsx の sortItems ロジックを独立してテスト（日時なしは常に末尾）
 function sortItems(items: TrendItem[], order: 'newest' | 'oldest' | 'source'): TrendItem[] {
   return [...items].sort((a, b) => {
     if (order === 'source') return a.source.localeCompare(b.source);
-    const ta = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-    const tb = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+    if (!a.publishedAt && !b.publishedAt) return 0;
+    if (!a.publishedAt) return 1;
+    if (!b.publishedAt) return -1;
+    const ta = new Date(a.publishedAt).getTime();
+    const tb = new Date(b.publishedAt).getTime();
     return order === 'newest' ? tb - ta : ta - tb;
   });
 }
@@ -23,19 +26,20 @@ describe('sortItems', () => {
     makeItem('d', undefined,               'Dソース'), // 日時なし
   ];
 
-  it('newest: 新しい順', () => {
+  it('newest: 新しい順（日時なしは末尾）', () => {
     const result = sortItems(items, 'newest');
-    expect(result[0].id).toBe('b');
+    expect(result[0].id).toBe('b'); // 最新
     expect(result[1].id).toBe('a');
     expect(result[2].id).toBe('c');
+    expect(result[3].id).toBe('d'); // publishedAt なし → 末尾
   });
 
-  it('oldest: 古い順', () => {
+  it('oldest: 古い順（日時なしは末尾）', () => {
     const result = sortItems(items, 'oldest');
-    expect(result[0].id).toBe('d'); // publishedAt=undefinedはtimestamp=0なので先頭
-    expect(result[1].id).toBe('c');
-    expect(result[2].id).toBe('a');
-    expect(result[3].id).toBe('b');
+    expect(result[0].id).toBe('c'); // 最古
+    expect(result[1].id).toBe('a');
+    expect(result[2].id).toBe('b'); // 最新
+    expect(result[3].id).toBe('d'); // publishedAt なし → 末尾
   });
 
   it('source: ソース名順（localeCompare）', () => {

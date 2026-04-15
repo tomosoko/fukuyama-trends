@@ -51,8 +51,11 @@ export default function ReadLaterPage() {
     let src = category === 'all' ? allItems : allItems.filter(i => i.category === category);
     return [...src].sort((a, b) => {
       if (sortOrder === 'hot') return (b.hotScore ?? 0) - (a.hotScore ?? 0);
-      const ta = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-      const tb = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+      if (!a.publishedAt && !b.publishedAt) return 0;
+      if (!a.publishedAt) return 1;
+      if (!b.publishedAt) return -1;
+      const ta = new Date(a.publishedAt).getTime();
+      const tb = new Date(b.publishedAt).getTime();
       return sortOrder === 'newest' ? tb - ta : ta - tb;
     });
   }, [allItems, category, sortOrder]);

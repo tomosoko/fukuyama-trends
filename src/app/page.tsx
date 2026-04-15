@@ -192,8 +192,12 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 function sortItems(items: TrendItem[], order: SortOrder): TrendItem[] {
   return [...items].sort((a, b) => {
     if (order === 'source') return a.source.localeCompare(b.source);
-    const ta = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-    const tb = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+    // 日時なしは常に末尾（「古い順」で1970年に表示されるバグを防ぐ）
+    if (!a.publishedAt && !b.publishedAt) return 0;
+    if (!a.publishedAt) return 1;
+    if (!b.publishedAt) return -1;
+    const ta = new Date(a.publishedAt).getTime();
+    const tb = new Date(b.publishedAt).getTime();
     return order === 'newest' ? tb - ta : ta - tb;
   });
 }

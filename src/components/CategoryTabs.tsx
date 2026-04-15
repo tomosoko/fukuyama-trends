@@ -33,7 +33,7 @@ export function CategoryTabs({
               flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium
               transition-all duration-200 select-none
               ${isActive
-                ? 'bg-gray-900 text-white shadow-md shadow-gray-900/20'
+                ? 'bg-gray-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-md shadow-gray-900/20'
                 : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-400 border border-gray-200 dark:border-slate-700 hover:border-gray-400 hover:text-gray-900'
               }
             `}

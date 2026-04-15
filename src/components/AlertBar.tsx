@@ -25,7 +25,8 @@ export function AlertBar({ alerts, onAlertsChange, currentSearch }: AlertBarProp
     onAlertsChange(removeAlert(kw));
   };
 
-  const canAddSearch = currentSearch && !alerts.includes(currentSearch);
+  const trimmedSearch = currentSearch?.trim();
+  const canAddSearch = trimmedSearch && !alerts.includes(trimmedSearch);
 
   if (alerts.length === 0 && !canAddSearch) return null;
 
@@ -47,10 +48,10 @@ export function AlertBar({ alerts, onAlertsChange, currentSearch }: AlertBarProp
       ))}
       {canAddSearch && (
         <button
-          onClick={() => handleAdd(currentSearch!)}
+          onClick={() => handleAdd(trimmedSearch!)}
           className="flex items-center gap-1 px-2 py-0.5 bg-amber-500 text-white text-xs rounded-full font-medium hover:bg-amber-600 transition-colors"
         >
-          + 「{currentSearch}」を追加
+          + 「{trimmedSearch}」を追加
         </button>
       )}
       {showAdd ? (

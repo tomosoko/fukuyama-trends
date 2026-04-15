@@ -8,15 +8,26 @@ export function OfflineBar() {
 
   useEffect(() => {
     setIsOffline(!navigator.onLine);
+    let restoreTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const handleOffline = () => { setIsOffline(true); setShowRestore(false); };
-    const handleOnline = () => { setIsOffline(false); setShowRestore(true); setTimeout(() => setShowRestore(false), 3000); };
+    const handleOffline = () => {
+      if (restoreTimer) { clearTimeout(restoreTimer); restoreTimer = null; }
+      setIsOffline(true);
+      setShowRestore(false);
+    };
+    const handleOnline = () => {
+      setIsOffline(false);
+      setShowRestore(true);
+      if (restoreTimer) clearTimeout(restoreTimer);
+      restoreTimer = setTimeout(() => setShowRestore(false), 3000);
+    };
 
     window.addEventListener('offline', handleOffline);
     window.addEventListener('online', handleOnline);
     return () => {
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online', handleOnline);
+      if (restoreTimer) clearTimeout(restoreTimer);
     };
   }, []);
 

@@ -257,6 +257,7 @@ export default function Home() {
     fetch('/api/trends' + qs)
       .then(r => r.json())
       .then((data: TrendItem[]) => {
+        if (!Array.isArray(data)) throw new Error('Invalid response');
         setItems(data);
         setUpdatedAt(new Date());
         if (force) showToast(`${data.length}件の情報を取得しました`, 'success');
@@ -362,9 +363,10 @@ export default function Home() {
               )}
             </button>
             <button
-              onClick={requestPermission}
-              className={`p-2 rounded-lg transition-colors ${permission === 'granted' ? 'text-amber-400' : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20'}`}
-              title={permission === 'granted' ? '通知ON' : '通知を許可'}
+              onClick={permission === 'denied' ? undefined : requestPermission}
+              disabled={permission === 'denied'}
+              className={`p-2 rounded-lg transition-colors ${permission === 'granted' ? 'text-amber-400' : permission === 'denied' ? 'text-gray-200 dark:text-slate-700 cursor-not-allowed' : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20'}`}
+              title={permission === 'granted' ? '通知ON' : permission === 'denied' ? 'ブラウザの設定で通知が拒否されています' : '通知を許可'}
             >
               <svg className="w-4 h-4" fill={permission === 'granted' ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}

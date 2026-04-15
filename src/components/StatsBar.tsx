@@ -43,7 +43,7 @@ export function StatsBar({ items, updatedAt }: { items: TrendItem[]; updatedAt: 
   const hotCount    = items.filter(i => (i.hotScore ?? 0) >= HOT_THRESHOLD).length;
   const gourmetPct  = Math.round(items.filter(i => i.category === 'gourmet').length / items.length * 100);
   const eventsPct   = Math.round(items.filter(i => i.category === 'events').length / items.length * 100);
-  const trendsPct   = 100 - gourmetPct - eventsPct;
+  const trendsPct   = Math.max(0, 100 - gourmetPct - eventsPct);
 
   return (
     <div className="space-y-2">

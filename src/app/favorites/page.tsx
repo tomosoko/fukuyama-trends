@@ -30,7 +30,10 @@ export default function FavoritesPage() {
     setFavIds(ids);
     fetch('/api/trends')
       .then(r => r.json())
-      .then((data: TrendItem[]) => setAllItems(data.filter(i => ids.has(i.id))))
+      .then((data: TrendItem[]) => {
+        if (!Array.isArray(data)) throw new Error('Invalid response');
+        setAllItems(data.filter(i => ids.has(i.id)));
+      })
       .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, []);

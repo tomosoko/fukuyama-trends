@@ -30,7 +30,10 @@ export default function ReadLaterPage() {
     setIds(saved);
     fetch('/api/trends')
       .then(r => r.json())
-      .then((data: TrendItem[]) => setAllItems(data.filter(i => saved.has(i.id))))
+      .then((data: TrendItem[]) => {
+        if (!Array.isArray(data)) throw new Error('Invalid response');
+        setAllItems(data.filter(i => saved.has(i.id)));
+      })
       .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, []);

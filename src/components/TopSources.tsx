@@ -19,14 +19,24 @@ const SOURCE_COLORS: Record<string, string> = {
 
 export function TopSources({ items }: { items: TrendItem[] }) {
   const sources = useMemo<SourceStat[]>(() => {
-    const map = new Map<string, SourceStat>();
+    const map = new Map<string, { count: number; hotCount: number; catCounts: Record<string, number> }>();
     for (const item of items) {
-      const s = map.get(item.source) ?? { name: item.source, count: 0, hotCount: 0, category: item.category };
+      const s = map.get(item.source) ?? { count: 0, hotCount: 0, catCounts: {} };
       s.count++;
       if ((item.hotScore ?? 0) >= HOT_THRESHOLD) s.hotCount++;
+      s.catCounts[item.category] = (s.catCounts[item.category] ?? 0) + 1;
       map.set(item.source, s);
     }
-    return [...map.values()].sort((a, b) => b.count - a.count).slice(0, 6);
+    return [...map.entries()]
+      .map(([name, s]) => ({
+        name,
+        count: s.count,
+        hotCount: s.hotCount,
+        // most frequent category for this source (not just first-seen)
+        category: Object.entries(s.catCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'trends',
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 6);
   }, [items]);
 
   if (sources.length === 0) return null;

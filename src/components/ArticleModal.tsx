@@ -235,7 +235,7 @@ export function ArticleModal({ item, allItems = [], onClose, onNavigate }: Artic
                     onClick={() => onNavigate?.(rel)}
                     className="w-full text-left flex items-start gap-3 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors group"
                   >
-                    <div className={`w-1.5 rounded-full self-stretch shrink-0 bg-${rel.category === 'gourmet' ? 'orange' : rel.category === 'events' ? 'blue' : 'violet'}-400`} />
+                    <div className={`w-1.5 rounded-full self-stretch shrink-0 ${rel.category === 'gourmet' ? 'bg-orange-400' : rel.category === 'events' ? 'bg-blue-400' : 'bg-violet-400'}`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-gray-700 dark:text-slate-300 line-clamp-2 leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                         {rel.title}

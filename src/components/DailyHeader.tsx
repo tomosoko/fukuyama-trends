@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 // 月ごとの福山おすすめ情報
 const MONTHLY_TIPS: Record<number, string> = {
@@ -43,20 +43,20 @@ function getDateInfo() {
 export function DailyHeader() {
   const [info, setInfo] = useState(getDateInfo);
 
-  // 真夜中に日付を更新する
+  // 真夜中に日付を更新する（letで最新のtimer IDを追跡し、再スケジュール後もクリアできるようにする）
   useEffect(() => {
+    let timerId: ReturnType<typeof setTimeout>;
     const scheduleUpdate = () => {
       const now = new Date();
       const msUntilMidnight =
         new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() - now.getTime();
-      const id = setTimeout(() => {
+      timerId = setTimeout(() => {
         setInfo(getDateInfo());
         scheduleUpdate();
       }, msUntilMidnight);
-      return id;
     };
-    const id = scheduleUpdate();
-    return () => clearTimeout(id);
+    scheduleUpdate();
+    return () => clearTimeout(timerId);
   }, []);
 
   const { dateStr, dayTip, monthTip } = info;

@@ -1,7 +1,6 @@
 'use client';
 
 const KEY = 'fukuyama-read';
-export const READ_STORAGE_KEY = KEY;
 const MAX = 200;
 
 export function getReadIds(): Set<string> {

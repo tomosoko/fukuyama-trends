@@ -116,7 +116,7 @@ function SummaryCard({ summary, loading }: { summary: AISummary | null; loading:
           <>
             <p className="text-base font-bold leading-snug mb-3">{displaySummary?.highlight}</p>
             <div className="space-y-2">
-              {displaySummary?.items.map(s => (
+              {displaySummary?.items?.map(s => (
                 <div key={s.category} className="flex items-start gap-2.5 text-sm">
                   <span className="mt-0.5 shrink-0 rounded-md bg-white/20 px-2 py-0.5 text-xs font-semibold">
                     {s.category}

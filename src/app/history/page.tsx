@@ -30,7 +30,10 @@ export default function HistoryPage() {
     setIds(readIds);
     fetch('/api/trends')
       .then(r => r.json())
-      .then((data: TrendItem[]) => setAllItems(data.filter(i => readIds.has(i.id))))
+      .then((data: TrendItem[]) => {
+        if (!Array.isArray(data)) throw new Error('Invalid response');
+        setAllItems(data.filter(i => readIds.has(i.id)));
+      })
       .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, []);

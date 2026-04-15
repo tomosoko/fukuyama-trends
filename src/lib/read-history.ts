@@ -25,4 +25,6 @@ export function markAsRead(id: string): void {
 
 export function clearReadHistory(): void {
   localStorage.removeItem(KEY);
+  // カード類のisRead状態をリセットさせるために同タブにも通知
+  window.dispatchEvent(new StorageEvent('storage', { key: KEY }));
 }

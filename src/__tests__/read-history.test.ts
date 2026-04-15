@@ -66,4 +66,11 @@ describe('clearReadHistory', () => {
   it('空の状態でclearしても問題ない', () => {
     expect(() => clearReadHistory()).not.toThrow();
   });
+  it('clearReadHistoryはstorageイベントを発火する（カードのisRead状態をリセットさせる）', () => {
+    markAsRead('article-1');
+    let fired = false;
+    window.addEventListener('storage', () => { fired = true; }, { once: true });
+    clearReadHistory();
+    expect(fired).toBe(true);
+  });
 });

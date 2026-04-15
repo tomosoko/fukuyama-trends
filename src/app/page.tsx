@@ -59,16 +59,20 @@ function SummaryCard({ summary, loading }: { summary: AISummary | null; loading:
   const [tab, setTab] = useState<SummaryTab>('all');
   const [catSummary, setCatSummary] = useState<AISummary | null>(null);
   const [catLoading, setCatLoading] = useState(false);
+  // タブ切替の競合防止: 最新のfetchにだけstateを更新させる
+  const fetchGenRef = useRef(0);
 
   const loadCatSummary = async (cat: SummaryTab) => {
     if (cat === 'all') { setCatSummary(null); return; }
+    const gen = ++fetchGenRef.current;
     setCatLoading(true);
     try {
       const res = await fetch(`/api/summary/${cat}`);
       const data = await res.json();
-      setCatSummary(data);
+      // 最新のfetchでなければ結果を捨てる（古いfetchが後から戻ってきた場合）
+      if (gen === fetchGenRef.current) setCatSummary(data);
     } catch { /* ignore */ } finally {
-      setCatLoading(false);
+      if (gen === fetchGenRef.current) setCatLoading(false);
     }
   };
 

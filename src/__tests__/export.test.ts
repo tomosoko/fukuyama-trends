@@ -18,10 +18,13 @@ beforeEach(() => {
   vi.spyOn(URL, 'revokeObjectURL').mockImplementation(mockRevokeObjectURL);
   vi.spyOn(document, 'createElement').mockImplementation((tag) => {
     if (tag === 'a') {
-      return { href: '', download: '', click: mockClick } as unknown as HTMLElement;
+      return { href: '', download: '', click: mockClick, parentNode: null } as unknown as HTMLElement;
     }
     return document.createElement(tag);
   });
+  // Firefox compat: export.ts appends/removes anchor from body
+  vi.spyOn(document.body, 'appendChild').mockImplementation(node => node);
+  vi.spyOn(document.body, 'removeChild').mockImplementation(node => node);
 });
 
 function makeItem(overrides: Partial<TrendItem> = {}): TrendItem {

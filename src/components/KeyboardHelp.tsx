@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 const SHORTCUTS = [
   { key: '/',         desc: '検索フォームにフォーカス' },
@@ -13,14 +13,17 @@ const SHORTCUTS = [
 ];
 
 export function KeyboardHelp({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') onCloseRef.current();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [open, onClose]);
+  }, [open]); // onCloseはrefで追跡するため依存に含めない
 
   if (!open) return null;
 

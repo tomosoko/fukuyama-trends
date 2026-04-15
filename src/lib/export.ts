@@ -24,7 +24,9 @@ export function exportAsText(items: TrendItem[]): void {
   const a = document.createElement('a');
   a.href = url;
   a.download = `fukuyama-trends-${new Date().toISOString().slice(0, 10)}.txt`;
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
@@ -46,6 +48,8 @@ export function exportAsCSV(items: TrendItem[]): void {
   const a = document.createElement('a');
   a.href = url;
   a.download = `fukuyama-trends-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }

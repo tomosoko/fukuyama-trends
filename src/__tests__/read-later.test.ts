@@ -36,6 +36,12 @@ describe('toggleReadLater', () => {
     toggleReadLater('article-1');
     expect(JSON.parse(localStorage.getItem('fk_read_later')!)).not.toContain('article-1');
   });
+  it('toggleReadLaterはstorageイベントを発火する', () => {
+    let fired = false;
+    window.addEventListener('storage', () => { fired = true; }, { once: true });
+    toggleReadLater('article-storage-test');
+    expect(fired).toBe(true);
+  });
 });
 
 describe('isInReadLater', () => {
